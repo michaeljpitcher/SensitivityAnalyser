@@ -4,7 +4,7 @@ import numpy
 
 class LatinHypercubeLab(epyc.Lab):
     """
-    An epyc lab, which creates a latin hypercube of parameter values (as opposed to cross-product)
+    An epyc lab, which creates a latin hypercube of uncertain parameter values (as opposed to cross-product)
     """
     def __init__(self, notebook):
         epyc.Lab.__init__(self, notebook)
@@ -23,28 +23,43 @@ class LatinHypercubeLab(epyc.Lab):
     def _latin_hypercube_sample_matrix(self, ls):
         """Internal method to generate the latin Hypercube sample of all parameter
         values, creating the parameter space for the experiment. Each value within
-        the parameter range of a parameter is sampled only once.
+        the parameter range of an uncertain parameter is sampled only once.
 
         :param ls: an array of parameter names
         :returns: list of dicts"""
-        # TODO: we assume that parameters have been stratified and values within each stratification chosen
+        uncertain_params = {}
+        certain_params = {}
+        stratifications = 0
 
-        # Ensure all parameters have the same number of options
-        stratifications = len(self._parameters[ls[0]])
-        assert all(len(q) == stratifications for q in self._parameters.values()), "All parameters must have equal " \
-                                                                                  "number of stratifications for " \
-                                                                                  "Latin Hypercube sampling"
-        ds = []
-        chosen = {}
-        # Shuffle the range for each parameter
-        for p,v in self._parameters.iteritems():
-            chosen[p] = numpy.random.choice(v,len(v),replace=False)
+        # Determine if each parameter is certain or uncertain
+        for param, param_range in self._parameters.iteritems():
+            if len(param_range) > 1:
+                uncertain_params[param] = param_range
+                # Check that the stratifications of this uncertain parameter range match previous uncertain parameters
+                if not stratifications:
+                    stratifications = len(param_range)
+                else:
+                    assert len(param_range) == stratifications, "All uncertain parameters must have equal number of " \
+                                                      "stratifications for Latin Hypercube sampling"
+            else:
+                # Only one value so parameter is certain
+                certain_params[param] = param_range[0]
+
+        # Create the samples
+        param_samples = []
+        uncertain_values = {}
+        # Shuffle the range for each uncertain parameter
+        for p,param_range in uncertain_params.iteritems():
+            uncertain_values[p] = numpy.random.choice(param_range,len(param_range),replace=False)
         # Assign a parameter set based on the shuffled values
         for i in range(stratifications):
-            values = {}
-            for p in self._parameters:
-                values[p] = chosen[p][i]
-            ds.append(values)
+            sample = {}
+            for p in uncertain_params:
+                sample[p] = uncertain_values[p][i]
+            # Set the certain params
+            for p, value in certain_params.iteritems():
+                sample[p] = value
+            param_samples.append(sample)
 
         # return the complete parameter space
-        return ds
+        return param_samples
