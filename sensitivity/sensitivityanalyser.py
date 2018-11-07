@@ -35,6 +35,9 @@ class SensitivityAnalyser(object):
         except OSError:
             print ('Error: Creating directory. ' + SensitivityAnalyser.MONOTONICITY)
 
+        self.lhs_data = None
+        self.lhs_outcome_variables = None
+
     def add_certain_parameter(self, parameter, value):
         """
         Add a parameter whose value is known a priori
@@ -138,64 +141,60 @@ class SensitivityAnalyser(object):
                 # Refresh figure window
                 plt.close()
 
-    # def generate_output_matrix(self, repetitions):
-    #     notebook = epyc.JSONLabNotebook(SensitivityAnalyser.LHS_FILENAME, create=True,
-    #                                     description="Sensitivity analysis")
-    #     lab = LatinHypercubeLab(notebook=notebook)
-    #     self._set_parameters(lab)
-    #     lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
-    #
-    # def obtain_results(self):
-    #     with open(SensitivityAnalyser.LHS_FILENAME) as data_file:
-    #         json_file = json.load(data_file)
-    #     data = json_file[epyc.Experiment.RESULTS].values()
-    #     number_of_param_variations = len(data)
-    #
-    #     parameters = data[0][0][epyc.Experiment.PARAMETERS].keys()
-    #     self.outcome_variables = data[0][0][epyc.Experiment.RESULTS].keys()
-    #
-    #     self.run_parameter_values = dict([(p, []) for p in parameters])
-    #     self.run_outcome_variable_values = dict([(r, []) for r in self.outcome_variables])
-    #
-    #     for n in range(number_of_param_variations):
-    #         for p in parameters:
-    #             # Params are same for all repetitions, so just use first
-    #             self.run_parameter_values[p].append(data[n][0][epyc.Experiment.PARAMETERS][p])
-    #         for r in self.outcome_variables:
-    #             # Output values may vary so take average
-    #             self.run_outcome_variable_values[r].append(numpy.average([repetition[epyc.Experiment.RESULTS][r]
-    #                                                                       for repetition in data[n]]))
-    #
-    # def get_all_pearson_correlation_coefficients(self):
-    #     coefficients = {}
-    #     for p,v in self.lab.get_uncertain_parameters().iteritems():
-    #         for r in self.outcome_variables:
-    #             coefficients[(p, r)] = self.get_pearson_correlation_coefficient(p, r)
-    #     return coefficients
-    #
-    # def get_pearson_correlation_coefficient(self, parameter, result):
-    #     """
-    #     For linear trends
-    #     :param parameter:
-    #     :param result:
-    #     :return:
-    #     """
-    #     assert parameter in self.lab.get_uncertain_parameters()
-    #     return scipy.stats.pearsonr(self.run_parameter_values[parameter], self.run_outcome_variable_values[result])
-    #
-    # def get_all_spearman_rank_correlation_coefficients(self):
-    #     coefficients = {}
-    #     for p,v in self.lab.get_uncertain_parameters().iteritems():
-    #         for r in self.outcome_variables:
-    #             coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
-    #     return coefficients
-    #
-    # def get_spearman_rank_correlation_coefficient(self, parameter, result):
-    #     """
-    #     For non-linear monotonic trends
-    #     :param parameter:
-    #     :param result:
-    #     :return:
-    #     """
-    #     assert parameter in self.lab.get_uncertain_parameters()
-    #     return scipy.stats.spearmanr(self.run_parameter_values[parameter], self.run_outcome_variable_values[result])
+    def generate_lhs_data(self, repetitions):
+        """
+        Create Latin Hypercube data. For each parameter sample, select a value from the range of each uncertain
+        parameter (without replacement)
+        :param repetitions:
+        :return:
+        """
+        notebook = epyc.JSONLabNotebook(SensitivityAnalyser.LHS_FILENAME, create=True, description="LHS")
+        lab = LatinHypercubeLab(notebook)
+        params = self.baseline_values.copy()
+        for q, v in self.uncertain_parameters.iteritems():
+            params[q] = v
+        for q, v in params.iteritems():
+            lab[q] = v
+        lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
+
+    def obtain_lhs_results(self):
+        self.lhs_data = self.read_data(SensitivityAnalyser.LHS_FILENAME)
+        self.lhs_outcome_variables = self.lhs_data[0][1].keys()
+
+    def get_all_pearson_correlation_coefficients(self):
+        coefficients = {}
+        for p in self.uncertain_parameters:
+            for r in self.lhs_outcome_variables:
+                coefficients[(p, r)] = self.get_pearson_correlation_coefficient(p, r)
+        return coefficients
+
+    def get_pearson_correlation_coefficient(self, parameter, result):
+        """
+        For linear trends
+        :param parameter:
+        :param result:
+        :return:
+        """
+        assert parameter in self.uncertain_parameters
+        param_data = [n[0][parameter] for n in self.lhs_data]
+        result_data = [n[1][result] for n in self.lhs_data]
+        return scipy.stats.pearsonr(param_data, result_data)
+
+    def get_all_spearman_rank_correlation_coefficients(self):
+        coefficients = {}
+        for p in self.uncertain_parameters:
+            for r in self.lhs_outcome_variables:
+                coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
+        return coefficients
+
+    def get_spearman_rank_correlation_coefficient(self, parameter, result):
+        """
+        For non-linear monotonic trends
+        :param parameter:
+        :param result:
+        :return:
+        """
+        assert parameter in self.uncertain_parameters
+        param_data = [n[0][parameter] for n in self.lhs_data]
+        result_data = [n[1][result] for n in self.lhs_data]
+        return scipy.stats.spearmanr(param_data, result_data)
