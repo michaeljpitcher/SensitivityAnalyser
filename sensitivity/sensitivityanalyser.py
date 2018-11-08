@@ -2,11 +2,11 @@ import os
 import epyc
 import json
 import numpy
-import collections
 import scipy.stats
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+
+from partialcorrelation import *
+
 
 from lhslab import LatinHypercubeLab
 
@@ -14,6 +14,11 @@ from lhslab import LatinHypercubeLab
 # TODO: do we need extra labs or not (monotonic vs LHS)
 
 class SensitivityAnalyser(object):
+    """
+
+    """
+
+
     MONOTONICITY = 'monotonicity'
     MONOTONICITY_FOLDER = MONOTONICITY + '/'
     MONOTONICITY_FILENAME_SUFFIX = '_' + MONOTONICITY + '.json'
@@ -73,7 +78,9 @@ class SensitivityAnalyser(object):
         averaged_data = []
         for param_variation in data:
             # Parameters will be the same for all repetitions
-            param_sample = param_variation[0][epyc.Experiment.PARAMETERS]
+            param_sample = {}
+            for p in self.uncertain_parameters:
+                param_sample[p] = param_variation[0][epyc.Experiment.PARAMETERS][p]
             if len(param_variation) > 1:
                 # Multiple repetitions so we need to average
                 repetition_results = [p[epyc.Experiment.RESULTS] for p in param_variation]
@@ -198,3 +205,6 @@ class SensitivityAnalyser(object):
         param_data = [n[0][parameter] for n in self.lhs_data]
         result_data = [n[1][result] for n in self.lhs_data]
         return scipy.stats.spearmanr(param_data, result_data)
+
+    def get_prcc(self):
+        print self.lhs_data
