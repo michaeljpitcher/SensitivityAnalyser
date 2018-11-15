@@ -1,2 +1,3 @@
 from lhslab import *
-from sensitivityanalyser import *
+from latinhypercubeSA import *
+from jsondatareader import *

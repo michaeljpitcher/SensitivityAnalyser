@@ -1,18 +1,16 @@
-#!/usr/bin/python
-
 import os
 import epyc
-import json
 import numpy
 import pandas
 import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn import linear_model
 
+from jsondatareader import read_epyc_json_data
 from lhslab import LatinHypercubeLab
 
 
-class SensitivityAnalyser(object):
+class LatinHypercubeSensitivityAnalyser(object):
     """
 
     """
@@ -36,16 +34,16 @@ class SensitivityAnalyser(object):
 
         # Create an output folder for monotonicity data
         try:
-            if not os.path.exists(SensitivityAnalyser.MONOTONICITY):
-                os.makedirs(SensitivityAnalyser.MONOTONICITY)
+            if not os.path.exists(LatinHypercubeSensitivityAnalyser.MONOTONICITY):
+                os.makedirs(LatinHypercubeSensitivityAnalyser.MONOTONICITY)
         except OSError:
-            print ('Error: Creating directory. ' + SensitivityAnalyser.MONOTONICITY)
+            print ('Error: Creating directory. ' + LatinHypercubeSensitivityAnalyser.MONOTONICITY)
 
         try:
-            if not os.path.exists(SensitivityAnalyser.PRCC):
-                os.makedirs(SensitivityAnalyser.PRCC)
+            if not os.path.exists(LatinHypercubeSensitivityAnalyser.PRCC):
+                os.makedirs(LatinHypercubeSensitivityAnalyser.PRCC)
         except OSError:
-            print ('Error: Creating directory. ' + SensitivityAnalyser.PRCC)
+            print ('Error: Creating directory. ' + LatinHypercubeSensitivityAnalyser.PRCC)
 
         self.lhs_params = None
         self.lhs_results = None
@@ -65,6 +63,11 @@ class SensitivityAnalyser(object):
             self.add_uncertain_parameter_uniform_distribution(k, r[0], r[1])
 
     def set_stratifications(self, stratifications):
+        """
+        Specify the number of stratifications for latin hypercube sampling
+        :param stratifications:
+        :return:
+        """
         self._stratifications = stratifications
 
     def add_certain_parameter(self, parameter, value):
@@ -91,27 +94,18 @@ class SensitivityAnalyser(object):
         self.baseline_values[parameter] = param_range[len(param_range)/2]
         self.uncertain_parameters[parameter] = param_range
 
-    def _read_data(self, filename):
-        with open(filename) as data_file:
-            data = json.load(data_file)[epyc.Experiment.RESULTS].values()
-        param_data = dict([(p,[]) for p in self.uncertain_parameters])
-        result_keys = data[0][0][epyc.Experiment.RESULTS].keys()
-        result_data = dict([(p, []) for p in result_keys])
-        for param_variation in data:
-            for p in self.uncertain_parameters:
-                param_data[p].append(param_variation[0][epyc.Experiment.PARAMETERS][p])
-            for k in result_keys:
-                if len(param_variation) > 1:
-                    # Multiple repetitions so we need to average
-                    repetition_results = [p[epyc.Experiment.RESULTS] for p in param_variation]
-                    result_data[k].append(numpy.average([rep[k] for rep in repetition_results]))
-                else:
-                    # Only 1 repetition (possibly a deterministic model) so just pass it through
-                    result_data[k].append(param_variation[0][epyc.Experiment.RESULTS][k])
-        return (pandas.DataFrame(param_data, index=range(1, self._stratifications+1)),
-                pandas.DataFrame(result_data, index=range(1, self._stratifications+1)))
-
     def _create_scatter_plot(self, x_data, y_data, title, filename, x_label, y_label, show=False):
+        """
+        Create a scatter plot
+        :param x_data:
+        :param y_data:
+        :param title:
+        :param filename:
+        :param x_label:
+        :param y_label:
+        :param show:
+        :return:
+        """
         plt.scatter(x_data, y_data)
         plt.title(title)
         plt.xlabel(x_label)
@@ -130,9 +124,10 @@ class SensitivityAnalyser(object):
         :return:
         """
         for p in self.uncertain_parameters:
-            notebook = epyc.JSONLabNotebook(SensitivityAnalyser.MONOTONICITY_FOLDER + p +
-                                            SensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX,
-                                            create=True, description=SensitivityAnalyser.MONOTONICITY + " " + p)
+            notebook = epyc.JSONLabNotebook(LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER + p +
+                                            LatinHypercubeSensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX,
+                                            create=True, description=LatinHypercubeSensitivityAnalyser.MONOTONICITY +
+                                                                     " " + p)
             lab = epyc.Lab(notebook)
             params = self.baseline_values.copy()
             params[p] = self.uncertain_parameters[p]
@@ -141,17 +136,25 @@ class SensitivityAnalyser(object):
             lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
 
     def create_monotonicity_plots(self, show=False):
+        """
+        Create plots comparing uncertain parameters against outcomes to check for nonlinearities and non-monotonicities
+        :param show:
+        :return:
+        """
         for param in self.uncertain_parameters:
             # Read data from json file and take average if repetitions
-            param_data, result_data = self._read_data(SensitivityAnalyser.MONOTONICITY_FOLDER + param +
-                                                      SensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX)
+            param_data, result_data = read_epyc_json_data(
+                LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER + param +
+                LatinHypercubeSensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX,
+                self.uncertain_parameters)
             # Only interested in the current parameters as all others set to baseline values
             param_data = param_data[param]
             for res in result_data:
                 result = result_data[res]
                 self._create_scatter_plot(param_data, result,
-                                          SensitivityAnalyser.MONOTONICITY + " - " + param + " on " + res,
-                                          SensitivityAnalyser.MONOTONICITY_FOLDER + SensitivityAnalyser.MONOTONICITY
+                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY + " - " + param + " on " + res,
+                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER +
+                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY
                                           + "_" + param + "_" + res, param, res, show)
 
     def generate_lhs_data(self, repetitions):
@@ -161,7 +164,7 @@ class SensitivityAnalyser(object):
         :param repetitions:
         :return:
         """
-        notebook = epyc.JSONLabNotebook(SensitivityAnalyser.LHS_FILENAME, create=True, description="LHS")
+        notebook = epyc.JSONLabNotebook(LatinHypercubeSensitivityAnalyser.LHS_FILENAME, create=True, description="LHS")
         lab = LatinHypercubeLab(notebook)
         params = self.baseline_values.copy()
         for q, v in self.uncertain_parameters.iteritems():
@@ -171,11 +174,20 @@ class SensitivityAnalyser(object):
         lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
 
     def obtain_lhs_results(self):
-        self.lhs_params, self.lhs_results = self._read_data(SensitivityAnalyser.LHS_FILENAME)
+        """
+        Load the Latin hypercube sample results
+        :return:
+        """
+        self.lhs_params, self.lhs_results = read_epyc_json_data(LatinHypercubeSensitivityAnalyser.LHS_FILENAME,
+                                                                self.uncertain_parameters)
         self.ranked_lhs_params = pandas.DataFrame.rank(self.lhs_params)
         self.ranked_lhs_results = pandas.DataFrame.rank(self.lhs_results)
 
     def get_all_pearson_correlation_coefficients(self):
+        """
+        Calculate all Pearson correlation coefficients
+        :return:
+        """
         coefficients = {}
         for p in self.uncertain_parameters:
             for r in self.lhs_results:
@@ -193,6 +205,10 @@ class SensitivityAnalyser(object):
         return stats.pearsonr(self.lhs_params[parameter], self.lhs_results[result])
 
     def get_all_spearman_rank_correlation_coefficients(self):
+        """
+        Calculate all Spearman Rank Correlation Coefficients
+        :return:
+        """
         coefficients = {}
         for p in self.uncertain_parameters:
             for r in self.lhs_results:
@@ -214,38 +230,63 @@ class SensitivityAnalyser(object):
         return prccs
 
     def calculate_prcc(self, result, plots=False):
+        """
+        Calculate a partial rank correlation coefficient (PRCC) value for all uncertain parameters against the output.
+
+        Partial correlation characterizes the linear relationship between an input and an output after the linear
+        effects of the remaining inputs on the output are discounted. This is calculated by constructing a linear
+        regression model between the input and the remaining inputs, and calculating the residuals between the input
+        values and the model. Similarly, a linear regression model between the output and the remaining input is
+        created and residuals are calculated. The PRCC is then the correlation coefficient between the input residuals
+        and the output residuals (Note all data is rank transformed).
+        :param result:
+        :param plots:
+        :return:
+        """
+        # Linear regression model
         regr = linear_model.LinearRegression()
-
+        # Column headers
         cols = self.ranked_lhs_params.columns
-
+        # Turn data into numpy arrays
         param_data = numpy.asarray(self.ranked_lhs_params)
         result_data = numpy.asarray(self.ranked_lhs_results[result]).reshape((self._stratifications,1))
-
+        # Number of parameters
         k = param_data.shape[1]
 
         prccs = {}
         for i in range(k):
             label = cols[i]
+            # Create a truth dictionaries to split the parameter_data into the parameter of interest and all other
+            # parameters
             col = [j == i for j in range(k)]
-            remaining_col = numpy.logical_not(col)
-
+            # Numpy array of just the parameter
             param = param_data[:, col]
+            remaining_col = numpy.logical_not(col)
+            # Numpy array of all other parameters
             remaining_param = param_data[:, remaining_col]
 
+            # Fit a linear regression model between the remaining parameters and the parameter
             regr.fit(remaining_param, param)
+            # Use to construct a line
             linreg_param = regr.predict(remaining_param)
+            # Calculate residuals
             param_resid = param - linreg_param
 
+            # Fit a linear regression model between the remaining parameters and the parameter
             regr.fit(remaining_param, result_data)
+            # Use to construct a line
             linreg_result = regr.predict(remaining_param)
+            # Calculate residuals
             result_resid = result_data - linreg_result
 
+            # Determine correlation between residuals
             corr, p = stats.pearsonr(param_resid, result_resid)
             prccs[label] = (corr, p)
 
+            # Draw PRCC plots
             if plots:
                 title = "PRCC(" + label + ',' + result + "): " + str(corr) + '\n p =' + str(p)
-                filename = SensitivityAnalyser.PRCC_FOLDER + label + "_" + result + ".png"
+                filename = LatinHypercubeSensitivityAnalyser.PRCC_FOLDER + label + "_" + result + ".png"
                 self._create_scatter_plot(param_resid, result_resid, title, filename, label, result, False)
 
         return prccs
