@@ -34,13 +34,13 @@ class LatinHypercubeLab(epyc.Lab):
         # Determine if each parameter is certain or uncertain
         for param, param_range in self._parameters.iteritems():
             if len(param_range) > 1:
-                uncertain_params[param] = param_range
                 # Check that the stratifications of this uncertain parameter range match previous uncertain parameters
                 if not stratifications:
                     stratifications = len(param_range)
                 else:
                     assert len(param_range) == stratifications, "All uncertain parameters must have equal number of " \
-                                                      "stratifications for Latin Hypercube sampling"
+                                                                "stratifications for Latin Hypercube sampling"
+                uncertain_params[param] = param_range
             else:
                 # Only one value so parameter is certain
                 certain_params[param] = param_range[0]

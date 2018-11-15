@@ -1,32 +1,33 @@
+#!/usr/bin/python
+
 import os
 import epyc
 import json
 import numpy
-import scipy.stats
+import pandas
 import matplotlib.pyplot as plt
-
-from partialcorrelation import *
-
+from scipy import stats
+from sklearn import linear_model
 
 from lhslab import LatinHypercubeLab
 
-
-# TODO: do we need extra labs or not (monotonic vs LHS)
 
 class SensitivityAnalyser(object):
     """
 
     """
-
-
     MONOTONICITY = 'monotonicity'
     MONOTONICITY_FOLDER = MONOTONICITY + '/'
     MONOTONICITY_FILENAME_SUFFIX = '_' + MONOTONICITY + '.json'
     LHS_FILENAME = "lhs_output.json"
+    PRCC = 'PRCC'
+    PRCC_FOLDER = PRCC + '/'
 
     def __init__(self, model):
         assert isinstance(model, epyc.Experiment), "Model must be an epyc experiment"
         self.model = model
+
+        self._stratifications = 0
 
         # Uncertain parameters and their ranges
         self.uncertain_parameters = {}
@@ -40,8 +41,31 @@ class SensitivityAnalyser(object):
         except OSError:
             print ('Error: Creating directory. ' + SensitivityAnalyser.MONOTONICITY)
 
-        self.lhs_data = None
-        self.lhs_outcome_variables = None
+        try:
+            if not os.path.exists(SensitivityAnalyser.PRCC):
+                os.makedirs(SensitivityAnalyser.PRCC)
+        except OSError:
+            print ('Error: Creating directory. ' + SensitivityAnalyser.PRCC)
+
+        self.lhs_params = None
+        self.lhs_results = None
+        self.ranked_lhs_params = None
+        self.ranked_lhs_results = None
+
+    def __setitem__( self, k, r ):
+        """Add a parameter using array notation.
+
+        :param k: the parameter name
+        :param r: the parameter range"""
+        if isinstance(r, int):
+            self.add_certain_parameter(k, r)
+        elif isinstance(r, list):
+            assert len(r) == 2
+            # Assumes a uniform distribution
+            self.add_uncertain_parameter_uniform_distribution(k, r[0], r[1])
+
+    def set_stratifications(self, stratifications):
+        self._stratifications = stratifications
 
     def add_certain_parameter(self, parameter, value):
         """
@@ -52,7 +76,7 @@ class SensitivityAnalyser(object):
         """
         self.baseline_values[parameter] = value
 
-    def add_uncertain_parameter_uniform_distribution(self, parameter, start, stop, num):
+    def add_uncertain_parameter_uniform_distribution(self, parameter, start, stop):
         """
         Add a parameter whose value is not known a priori but is assumed to be uniform between two specified values
         :param parameter:
@@ -62,47 +86,41 @@ class SensitivityAnalyser(object):
         :return:
         """
         # Calculate range
-        param_range = numpy.linspace(start, stop, num)
+        param_range = numpy.linspace(start, stop, self._stratifications)
         # Baseline value is in the middle of the range
         self.baseline_values[parameter] = param_range[len(param_range)/2]
         self.uncertain_parameters[parameter] = param_range
 
-    def read_data(self, filename):
-        """
-        Given a JSON filename for epyc data, reads the JSON file in and averages the data over the repetitions.
-        :param filename:
-        :return:
-        """
+    def _read_data(self, filename):
         with open(filename) as data_file:
             data = json.load(data_file)[epyc.Experiment.RESULTS].values()
-        averaged_data = []
+        param_data = dict([(p,[]) for p in self.uncertain_parameters])
+        result_keys = data[0][0][epyc.Experiment.RESULTS].keys()
+        result_data = dict([(p, []) for p in result_keys])
         for param_variation in data:
-            # Parameters will be the same for all repetitions
-            param_sample = {}
             for p in self.uncertain_parameters:
-                param_sample[p] = param_variation[0][epyc.Experiment.PARAMETERS][p]
-            if len(param_variation) > 1:
-                # Multiple repetitions so we need to average
-                repetition_results = [p[epyc.Experiment.RESULTS] for p in param_variation]
-                avg_for_param_sample = self.average_data_from_repetitions(repetition_results)
-                averaged_data.append((param_sample, avg_for_param_sample))
-            else:
-                # Only 1 repetition (possibly a deterministic model) so just pass it through
-                averaged_data.append((param_sample, param_variation[0][epyc.Experiment.RESULTS]))
-        return averaged_data
+                param_data[p].append(param_variation[0][epyc.Experiment.PARAMETERS][p])
+            for k in result_keys:
+                if len(param_variation) > 1:
+                    # Multiple repetitions so we need to average
+                    repetition_results = [p[epyc.Experiment.RESULTS] for p in param_variation]
+                    result_data[k].append(numpy.average([rep[k] for rep in repetition_results]))
+                else:
+                    # Only 1 repetition (possibly a deterministic model) so just pass it through
+                    result_data[k].append(param_variation[0][epyc.Experiment.RESULTS][k])
+        return (pandas.DataFrame(param_data, index=range(1, self._stratifications+1)),
+                pandas.DataFrame(result_data, index=range(1, self._stratifications+1)))
 
-    def average_data_from_repetitions(self, repetitions):
-        """
-        Calculate the average result values for the repetitions. Default assumes that each result is a simple numeric
-        value, so averages them. May need to be sub-classed when the result is not so straightforward.
-        :param repetitions:
-        :return:
-        """
-        avg_data = {}
-        result_keys = repetitions[0].keys()
-        for k in result_keys:
-            avg_data[k] = numpy.average([rep[k] for rep in repetitions])
-        return avg_data
+    def _create_scatter_plot(self, x_data, y_data, title, filename, x_label, y_label, show=False):
+        plt.scatter(x_data, y_data)
+        plt.title(title)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.savefig(filename + ".png")
+        if show:
+            plt.show()
+        # Refresh figure window
+        plt.close()
 
     def generate_monotonicity_data(self, repetitions):
         """
@@ -123,30 +141,18 @@ class SensitivityAnalyser(object):
             lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
 
     def create_monotonicity_plots(self, show=False):
-        """
-        For each uncertain parameter, read the monotonicity data and make a scatter graph comparing values of parameter
-        against all recorded output results
-        :param show: Whether graph is displayed to user (graph is always saved)
-        :return:
-        """
-        for p in self.uncertain_parameters:
+        for param in self.uncertain_parameters:
             # Read data from json file and take average if repetitions
-            data = self.read_data(SensitivityAnalyser.MONOTONICITY_FOLDER + p +
-                                  SensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX)
-            # Determine which results were recorded
-            rk = data[0][1].keys()
-            # For each result, plot the parameter values against that result
-            for r in rk:
-                plt.scatter([d[0][p] for d in data], [d[1][r] for d in data])
-                plt.title(SensitivityAnalyser.MONOTONICITY + " - " + p + " on " + r)
-                plt.xlabel(p)
-                plt.ylabel(r)
-                plt.savefig(SensitivityAnalyser.MONOTONICITY_FOLDER + SensitivityAnalyser.MONOTONICITY + "_" + p + "_"
-                            + r + ".png")
-                if show:
-                    plt.show()
-                # Refresh figure window
-                plt.close()
+            param_data, result_data = self._read_data(SensitivityAnalyser.MONOTONICITY_FOLDER + param +
+                                                      SensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX)
+            # Only interested in the current parameters as all others set to baseline values
+            param_data = param_data[param]
+            for res in result_data:
+                result = result_data[res]
+                self._create_scatter_plot(param_data, result,
+                                          SensitivityAnalyser.MONOTONICITY + " - " + param + " on " + res,
+                                          SensitivityAnalyser.MONOTONICITY_FOLDER + SensitivityAnalyser.MONOTONICITY
+                                          + "_" + param + "_" + res, param, res, show)
 
     def generate_lhs_data(self, repetitions):
         """
@@ -165,13 +171,14 @@ class SensitivityAnalyser(object):
         lab.runExperiment(epyc.RepeatedExperiment(self.model, repetitions))
 
     def obtain_lhs_results(self):
-        self.lhs_data = self.read_data(SensitivityAnalyser.LHS_FILENAME)
-        self.lhs_outcome_variables = self.lhs_data[0][1].keys()
+        self.lhs_params, self.lhs_results = self._read_data(SensitivityAnalyser.LHS_FILENAME)
+        self.ranked_lhs_params = pandas.DataFrame.rank(self.lhs_params)
+        self.ranked_lhs_results = pandas.DataFrame.rank(self.lhs_results)
 
     def get_all_pearson_correlation_coefficients(self):
         coefficients = {}
         for p in self.uncertain_parameters:
-            for r in self.lhs_outcome_variables:
+            for r in self.lhs_results:
                 coefficients[(p, r)] = self.get_pearson_correlation_coefficient(p, r)
         return coefficients
 
@@ -183,14 +190,12 @@ class SensitivityAnalyser(object):
         :return:
         """
         assert parameter in self.uncertain_parameters
-        param_data = [n[0][parameter] for n in self.lhs_data]
-        result_data = [n[1][result] for n in self.lhs_data]
-        return scipy.stats.pearsonr(param_data, result_data)
+        return stats.pearsonr(self.lhs_params[parameter], self.lhs_results[result])
 
     def get_all_spearman_rank_correlation_coefficients(self):
         coefficients = {}
         for p in self.uncertain_parameters:
-            for r in self.lhs_outcome_variables:
+            for r in self.lhs_results:
                 coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
         return coefficients
 
@@ -202,9 +207,45 @@ class SensitivityAnalyser(object):
         :return:
         """
         assert parameter in self.uncertain_parameters
-        param_data = [n[0][parameter] for n in self.lhs_data]
-        result_data = [n[1][result] for n in self.lhs_data]
-        return scipy.stats.spearmanr(param_data, result_data)
+        return stats.spearmanr(self.lhs_params[parameter], self.lhs_results[result])
 
-    def get_prcc(self):
-        print self.lhs_data
+    def get_all_prcc(self, plots=False):
+        prccs = dict([(r, self.calculate_prcc(r, plots)) for r in self.ranked_lhs_results])
+        return prccs
+
+    def calculate_prcc(self, result, plots=False):
+        regr = linear_model.LinearRegression()
+
+        cols = self.ranked_lhs_params.columns
+
+        param_data = numpy.asarray(self.ranked_lhs_params)
+        result_data = numpy.asarray(self.ranked_lhs_results[result]).reshape((self._stratifications,1))
+
+        k = param_data.shape[1]
+
+        prccs = {}
+        for i in range(k):
+            label = cols[i]
+            col = [j == i for j in range(k)]
+            remaining_col = numpy.logical_not(col)
+
+            param = param_data[:, col]
+            remaining_param = param_data[:, remaining_col]
+
+            regr.fit(remaining_param, param)
+            linreg_param = regr.predict(remaining_param)
+            param_resid = param - linreg_param
+
+            regr.fit(remaining_param, result_data)
+            linreg_result = regr.predict(remaining_param)
+            result_resid = result_data - linreg_result
+
+            corr, p = stats.pearsonr(param_resid, result_resid)
+            prccs[label] = (corr, p)
+
+            if plots:
+                title = "PRCC(" + label + ',' + result + "): " + str(corr) + '\n p =' + str(p)
+                filename = SensitivityAnalyser.PRCC_FOLDER + label + "_" + result + ".png"
+                self._create_scatter_plot(param_resid, result_resid, title, filename, label, result, False)
+
+        return prccs
