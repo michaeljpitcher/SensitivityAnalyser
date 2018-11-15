@@ -2,11 +2,11 @@ import os
 import epyc
 import numpy
 import pandas
-import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn import linear_model
 
 from jsondatareader import read_epyc_json_data
+from scatterplot import create_scatter_plot
 from lhslab import LatinHypercubeLab
 
 
@@ -94,28 +94,6 @@ class LatinHypercubeSensitivityAnalyser(object):
         self.baseline_values[parameter] = param_range[len(param_range)/2]
         self.uncertain_parameters[parameter] = param_range
 
-    def _create_scatter_plot(self, x_data, y_data, title, filename, x_label, y_label, show=False):
-        """
-        Create a scatter plot
-        :param x_data:
-        :param y_data:
-        :param title:
-        :param filename:
-        :param x_label:
-        :param y_label:
-        :param show:
-        :return:
-        """
-        plt.scatter(x_data, y_data)
-        plt.title(title)
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.savefig(filename + ".png")
-        if show:
-            plt.show()
-        # Refresh figure window
-        plt.close()
-
     def generate_monotonicity_data(self, repetitions):
         """
         Create monotonicity data. For each uncertain parameter, run simulations on all points in its range (other
@@ -126,8 +104,8 @@ class LatinHypercubeSensitivityAnalyser(object):
         for p in self.uncertain_parameters:
             notebook = epyc.JSONLabNotebook(LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER + p +
                                             LatinHypercubeSensitivityAnalyser.MONOTONICITY_FILENAME_SUFFIX,
-                                            create=True, description=LatinHypercubeSensitivityAnalyser.MONOTONICITY +
-                                                                     " " + p)
+                                            create=True,
+                                            description=LatinHypercubeSensitivityAnalyser.MONOTONICITY + " " + p)
             lab = epyc.Lab(notebook)
             params = self.baseline_values.copy()
             params[p] = self.uncertain_parameters[p]
@@ -151,11 +129,11 @@ class LatinHypercubeSensitivityAnalyser(object):
             param_data = param_data[param]
             for res in result_data:
                 result = result_data[res]
-                self._create_scatter_plot(param_data, result,
-                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY + " - " + param + " on " + res,
-                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER +
-                                          LatinHypercubeSensitivityAnalyser.MONOTONICITY
-                                          + "_" + param + "_" + res, param, res, show)
+                create_scatter_plot(param_data, result,
+                                    LatinHypercubeSensitivityAnalyser.MONOTONICITY + " - " + param + " on " + res,
+                                    LatinHypercubeSensitivityAnalyser.MONOTONICITY_FOLDER +
+                                    LatinHypercubeSensitivityAnalyser.MONOTONICITY
+                                    + "_" + param + "_" + res, param, res, show)
 
     def generate_lhs_data(self, repetitions):
         """
@@ -287,6 +265,6 @@ class LatinHypercubeSensitivityAnalyser(object):
             if plots:
                 title = "PRCC(" + label + ',' + result + "): " + str(corr) + '\n p =' + str(p)
                 filename = LatinHypercubeSensitivityAnalyser.PRCC_FOLDER + label + "_" + result + ".png"
-                self._create_scatter_plot(param_resid, result_resid, title, filename, label, result, False)
+                create_scatter_plot(param_resid, result_resid, title, filename, label, result, False)
 
         return prccs

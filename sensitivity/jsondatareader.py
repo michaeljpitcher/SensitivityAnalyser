@@ -9,7 +9,7 @@ def read_epyc_json_data(filename, uncertain_parameters):
     Given an epyc JSON output file, reads in the data (and averages the result for multiple repetitions)
     :param filename:
     :param uncertain_parameters:
-    :return: 
+    :return:
     """
     with open(filename) as data_file:
         data = json.load(data_file)[epyc.Experiment.RESULTS].values()
@@ -25,7 +25,7 @@ def read_epyc_json_data(filename, uncertain_parameters):
                 repetition_results = [p[epyc.Experiment.RESULTS] for p in param_variation]
                 result_data[k].append(numpy.average([rep[k] for rep in repetition_results]))
             else:
-                # Only 1 repetition (possibly a deterministic model) so just pass it through
+                # Only 1 repetition (possibly from a deterministic model) so just pass it through
                 result_data[k].append(param_variation[0][epyc.Experiment.RESULTS][k])
 
-    return (pandas.DataFrame(param_data), pandas.DataFrame(result_data))
+    return pandas.DataFrame(param_data), pandas.DataFrame(result_data)
