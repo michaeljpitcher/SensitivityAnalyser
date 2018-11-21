@@ -16,6 +16,7 @@ def read_epyc_json_data(filename, uncertain_parameters):
     param_data = dict([(p, []) for p in uncertain_parameters])
     result_keys = data[0][0][epyc.Experiment.RESULTS].keys()
     result_data = dict([(p, []) for p in result_keys])
+    # TODO - this assumes result data is just numeric values
     for param_variation in data:
         for p in uncertain_parameters:
             param_data[p].append(param_variation[0][epyc.Experiment.PARAMETERS][p])
