@@ -1,5 +1,6 @@
 from ..data import *
 from ..sample import *
+from outputfolder import create_output_folder
 
 LHS_FILENAME = 'latinhypercube.json'
 
