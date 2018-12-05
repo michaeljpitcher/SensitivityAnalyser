@@ -150,6 +150,9 @@ class LHSAnalyser(object):
         if plot:
             title = "PRCC(" + parameter + ',' + result + "): " + str(corr) + '\n p =' + str(p)
             filename = self.output_folder + parameter + "_" + result
+            if time:
+                filename = filename + "_" + time
+                title = title + 't =' + time
             create_scatter_plot(param_resid, result_resid, title, filename, parameter, result, False)
 
         return (corr, p)
