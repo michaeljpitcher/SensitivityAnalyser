@@ -1,8 +1,9 @@
 import epyc
 import numpy
+from progressepyc import ProgressLab
 
 
-class LatinHypercubeLab(epyc.Lab):
+class LatinHypercubeLab(ProgressLab):
     """
     An epyc lab, which creates a latin hypercube of uncertain parameter values (as opposed to cross-product)
     """
@@ -18,9 +19,9 @@ class LatinHypercubeLab(epyc.Lab):
         if len(ps) == 0:
             return []
         else:
-            return self._latin_hypercube_sample_matrix(ps)
+            return self._latin_hypercube_sample_matrix()
 
-    def _latin_hypercube_sample_matrix(self, ls):
+    def _latin_hypercube_sample_matrix(self):
         """Internal method to generate the latin Hypercube sample of all parameter
         values, creating the parameter space for the experiment. Each value within
         the parameter range of an uncertain parameter is sampled only once.

@@ -1,7 +1,7 @@
 import os
 
 
-def create_output_folder(location):
+def create_folder(location):
     if not location:
         return
     else:

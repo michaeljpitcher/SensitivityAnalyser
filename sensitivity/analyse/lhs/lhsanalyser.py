@@ -1,21 +1,18 @@
-from ..data import *
-from ..evaluate import *
+import pandas
+from ..visual.scatterplot import plot_scatter_graph
 from scipy import stats
 from sklearn import linear_model
+import numpy
 
 
 class LHSAnalyser(object):
-    def __init__(self, parameter_set, output_folder=None, time_series=False):
+    def __init__(self, parameter_set, result_set, output_folder=None):
         if output_folder:
             self.output_folder = output_folder + '/'
         else:
             self.output_folder = ''
-        self.uncertain_parameters = parameter_set.uncertain_parameters.keys()
-        if time_series:
-            self.result_set = TimeSeriesResultSet(parameter_set)
-        else:
-            self.result_set = ResultSet(parameter_set)
-        self.result_set.load_data_from_json(self.output_folder + LHS_FILENAME)
+        self.uncertain_parameters = parameter_set.uncertain_parameters().keys()
+        self.result_set = result_set
         self._stratifications = len(self.result_set)
 
     def get_all_pearson_correlation_coefficients(self):
@@ -25,16 +22,11 @@ class LHSAnalyser(object):
         """
         coefficients = {}
         for p in self.uncertain_parameters:
-            if isinstance(self.result_set, TimeSeriesResultSet):
-                for t in self.result_set.timesteps():
-                    for r in self.result_set.result_keys():
-                        coefficients[(t,p,r)] = self.get_pearson_correlation_coefficient(p, r, t)
-            else:
-                for r in self.result_set.result_keys():
+            for r in self.result_set.result_keys():
                     coefficients[(p, r)] = self.get_pearson_correlation_coefficient(p, r)
         return coefficients
 
-    def get_pearson_correlation_coefficient(self, parameter, result, time=None):
+    def get_pearson_correlation_coefficient(self, parameter, result):
         """
         For linear trends
         :param parameter:
@@ -43,10 +35,7 @@ class LHSAnalyser(object):
         :return:
         """
         assert parameter in self.uncertain_parameters
-        if time:
-            return stats.pearsonr(self.result_set.parameter_data(parameter), self.result_set.result_data(time, result))
-        else:
-            return stats.pearsonr(self.result_set.parameter_data(parameter), self.result_set.result_data(result))
+        return stats.pearsonr(self.result_set.parameter_samples(parameter), self.result_set.result_data(result))
 
     def get_all_spearman_rank_correlation_coefficients(self):
         """
@@ -55,16 +44,11 @@ class LHSAnalyser(object):
         """
         coefficients = {}
         for p in self.uncertain_parameters:
-            if isinstance(self.result_set, TimeSeriesResultSet):
-                for t in self.result_set.timesteps():
-                    for r in self.result_set.result_keys():
-                        coefficients[(t,p,r)] = self.get_spearman_rank_correlation_coefficient(p, r, t)
-            else:
-                for r in self.result_set.result_keys():
-                    coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
+            for r in self.result_set.result_keys():
+                coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
         return coefficients
 
-    def get_spearman_rank_correlation_coefficient(self, parameter, result, time=None):
+    def get_spearman_rank_correlation_coefficient(self, parameter, result):
         """
         For non-linear monotonic trends
         :param parameter:
@@ -72,23 +56,16 @@ class LHSAnalyser(object):
         :return:
         """
         assert parameter in self.uncertain_parameters
-        if time:
-            return stats.spearmanr(self.result_set.parameter_data(parameter), self.result_set.result_data(time, result))
-        else:
-            return stats.spearmanr(self.result_set.parameter_data(parameter), self.result_set.result_data(result))
+        return stats.spearmanr(self.result_set.parameter_samples(parameter), self.result_set.result_data(result))
 
     def get_all_prcc(self, plots=False):
         prccs = []
         for result in self.result_set.result_keys():
             for param in self.uncertain_parameters:
-                if isinstance(self.result_set, TimeSeriesResultSet):
-                    for time in self.result_set.timesteps():
-                        prccs.append(((time, param, result), self.calculate_prcc(result, param, time=time, plot=plots)))
-                else:
-                    prccs.append(((param, result), self.calculate_prcc(result, param, plot=plots)))
+                prccs.append(((param, result), self.calculate_prcc(result, param, plot=plots)))
         return prccs
 
-    def calculate_prcc(self, result, parameter, time=None, plot=False):
+    def calculate_prcc(self, result, parameter, plot=False):
         """
         Calculate a partial rank correlation coefficient (PRCC) value for an uncertain parameters against the output.
 
@@ -99,19 +76,15 @@ class LHSAnalyser(object):
         created and residuals are calculated. The PRCC is then the correlation coefficient between the input residuals
         and the output residuals (Note all data is rank transformed).
         :param result:
-        :param param:
-        :param time:
-        :param plots:
+        :param parameter:
+        :param plot:
         :return:
         """
         # Linear regression model
         regr = linear_model.LinearRegression()
 
-        ranked_params = pandas.DataFrame.rank(self.result_set.parameter_data())
-        if time:
-            ranked_results = pandas.DataFrame.rank(self.result_set.result_data(time=time))
-        else:
-            ranked_results = pandas.DataFrame.rank(self.result_set.result_data())
+        ranked_params = pandas.DataFrame.rank(self.result_set.parameter_samples())
+        ranked_results = pandas.DataFrame.rank(self.result_set.result_data())
 
         # Turn data into numpy arrays
         all_params_data = numpy.asarray(ranked_params)
@@ -150,9 +123,6 @@ class LHSAnalyser(object):
         if plot:
             title = "PRCC(" + parameter + ',' + result + "): " + str(corr) + '\n p =' + str(p)
             filename = self.output_folder + parameter + "_" + result
-            if time:
-                filename = filename + "_" + time
-                title = title + 't =' + time
-            create_scatter_plot(param_resid, result_resid, title, filename, parameter, result, False)
+            plot_scatter_graph(param_resid, result_resid, title, parameter, result, True, filename, False)
 
         return (corr, p)
