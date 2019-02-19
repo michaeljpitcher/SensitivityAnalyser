@@ -69,3 +69,68 @@ class ResultSet(object):
         :return: aggregated data
         """
         return row
+
+
+class TimeSeriesResultSet(ResultSet):
+    def __init__(self, parameter_set=None):
+        self._timesteps = None
+        ResultSet.__init__(self, parameter_set)
+
+    def load_epyc_results_from_json(self, filename):
+        """
+        Given filename for an epyc JSON output file, loads the data from that file. Data can be aggregated for cases
+        of multiple repetitions
+        :param filename:
+        :return:
+        """
+        with open(filename) as data_file:
+            json_data = json.load(data_file)
+        # Set string value of this class to equal the epyc description
+        self._description = json_data['description']
+        # Load the results
+        results = json_data[epyc.Experiment.RESULTS]
+        parameter_samples = []
+        result_data = {}
+        result_keys = []
+        # Loop through all rows (param_variations) of JSON file
+        for v in results.values():
+            # Take the parameter sample from the first repetition (should be the same for all repetitions)
+            parameter_samples.append(v[0][epyc.Experiment.PARAMETERS])
+            # Obtain the relevant data from each repetition
+            data_to_aggregate = []
+            for rep_row in v:
+                data_to_aggregate.append(self._get_data(rep_row[epyc.Experiment.RESULTS]))
+
+            if not self._timesteps:
+                self._timesteps = data_to_aggregate[0].keys()
+                result_data = {t: [] for t in self._timesteps}
+                result_keys = data_to_aggregate[0][self._timesteps[0]].keys()
+
+            # Calculate the average
+            aggregated_data = {t: {k: numpy.average([d[t][k] for d in data_to_aggregate]) for k in result_keys}
+                               for t in self._timesteps}
+            for t in self._timesteps:
+                result_data[t].append(aggregated_data[t])
+
+        # Store data as DataFrame objects
+        self._param_samples = pandas.DataFrame(parameter_samples)
+        print result_data
+        self._result_data = {t: pandas.DataFrame(d) for t,d in result_data.iteritems()}
+        self._result_keys = result_keys
+
+
+        print self._result_data['1'].columns
+
+    def result_data(self, timestep=None, result_key=None):
+        if timestep is None and result_key is None:
+            return self._result_data
+        elif timestep is not None:
+            return self._result_data[timestep]
+        else:
+            return {t: d[result_key] for t, d in self._result_data.iteritems()}
+
+    def __len__(self):
+        return len(self._result_data.values()[0])
+
+    def timesteps(self):
+        return self._timesteps
