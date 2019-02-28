@@ -114,20 +114,19 @@ class TimeSeriesResultSet(ResultSet):
 
         # Store data as DataFrame objects
         self._param_samples = pandas.DataFrame(parameter_samples)
-        print result_data
         self._result_data = {t: pandas.DataFrame(d) for t,d in result_data.iteritems()}
         self._result_keys = result_keys
 
-
-        print self._result_data['1'].columns
-
     def result_data(self, timestep=None, result_key=None):
+
         if timestep is None and result_key is None:
             return self._result_data
-        elif timestep is not None:
+        elif timestep is not None and result_key is None:
             return self._result_data[timestep]
-        else:
+        elif timestep is None and result_key is not None:
             return {t: d[result_key] for t, d in self._result_data.iteritems()}
+        else:
+            return self._result_data[timestep][result_key]
 
     def __len__(self):
         return len(self._result_data.values()[0])
