@@ -11,9 +11,15 @@ class LHSAnalyser(object):
             self.output_folder = output_folder + '/'
         else:
             self.output_folder = ''
-        self.uncertain_parameters = parameter_set.uncertain_parameters().keys()
-        self.result_set = result_set
-        self._stratifications = len(self.result_set)
+        self._uncertain_parameters = parameter_set.uncertain_parameters().keys()
+        self._result_set = result_set
+        self._stratifications = len(self._result_set)
+
+    def result_set(self):
+        return self._result_set
+
+    def uncertain_parameters(self):
+        return self._uncertain_parameters
 
     def get_all_pearson_correlation_coefficients(self):
         """
@@ -21,8 +27,8 @@ class LHSAnalyser(object):
         :return:
         """
         coefficients = {}
-        for p in self.uncertain_parameters:
-            for r in self.result_set.result_keys():
+        for p in self._uncertain_parameters:
+            for r in self._result_set.result_keys():
                     coefficients[(p, r)] = self.get_pearson_correlation_coefficient(p, r)
         return coefficients
 
@@ -31,11 +37,10 @@ class LHSAnalyser(object):
         For linear trends
         :param parameter:
         :param result:
-        :param time
         :return:
         """
-        assert parameter in self.uncertain_parameters
-        return stats.pearsonr(self.result_set.parameter_samples(parameter), self.result_set.result_data(result))
+        assert parameter in self._uncertain_parameters
+        return stats.pearsonr(self._result_set.parameter_samples(parameter), self._result_set.result_data(result))
 
     def get_all_spearman_rank_correlation_coefficients(self):
         """
@@ -43,8 +48,8 @@ class LHSAnalyser(object):
         :return:
         """
         coefficients = {}
-        for p in self.uncertain_parameters:
-            for r in self.result_set.result_keys():
+        for p in self._uncertain_parameters:
+            for r in self._result_set.result_keys():
                 coefficients[(p, r)] = self.get_spearman_rank_correlation_coefficient(p, r)
         return coefficients
 
@@ -55,13 +60,13 @@ class LHSAnalyser(object):
         :param result:
         :return:
         """
-        assert parameter in self.uncertain_parameters
-        return stats.spearmanr(self.result_set.parameter_samples(parameter), self.result_set.result_data(result))
+        assert parameter in self._uncertain_parameters
+        return stats.spearmanr(self._result_set.parameter_samples(parameter), self._result_set.result_data(result))
 
     def get_all_prcc(self, plots=False):
         prccs = []
-        for result in self.result_set.result_keys():
-            for param in self.uncertain_parameters:
+        for result in self._result_set.result_keys():
+            for param in self._uncertain_parameters:
                 prccs.append(((param, result), self.calculate_prcc(result, param, plot=plots)))
         return prccs
 
@@ -83,8 +88,8 @@ class LHSAnalyser(object):
         # Linear regression model
         regr = linear_model.LinearRegression()
 
-        ranked_params = pandas.DataFrame.rank(self.result_set.parameter_samples())
-        ranked_results = pandas.DataFrame.rank(self.result_set.result_data())
+        ranked_params = pandas.DataFrame.rank(self._result_set.parameter_samples())
+        ranked_results = pandas.DataFrame.rank(self._result_set.result_data())
 
         # Turn data into numpy arrays
         all_params_data = numpy.asarray(ranked_params)
@@ -126,3 +131,56 @@ class LHSAnalyser(object):
             plot_scatter_graph(param_resid, result_resid, title, parameter, result, True, filename, False)
 
         return (corr, p)
+
+
+class LHSTimeSeriesAnalyser(LHSAnalyser):
+    def __init__(self, parameter_set, result_set, output_folder=None):
+        LHSAnalyser.__init__(self, parameter_set, result_set, output_folder)
+
+    def timesteps(self):
+        return self._result_set.timesteps()
+
+    def get_all_pearson_correlation_coefficients(self):
+        """
+        Calculate all Pearson correlation coefficients
+        :return:
+        """
+        coefficients = {}
+        for t in self.timesteps():
+            for p in self._uncertain_parameters:
+                for r in self._result_set.result_keys():
+                    coefficients[(t, p, r)] = self.get_pearson_correlation_coefficient_time(t, p, r)
+        return coefficients
+
+    def get_pearson_correlation_coefficient_time(self, time, parameter, result):
+        """
+        For linear trends
+        :param parameter:
+        :param result:
+        :return:
+        """
+        assert parameter in self._uncertain_parameters
+        print self._result_set.result_data(time, result)
+        return stats.pearsonr(self._result_set.parameter_samples(parameter), self._result_set.result_data(time, result))
+
+    def get_all_spearman_rank_correlation_coefficients(self):
+        """
+        Calculate all Spearman Rank Correlation Coefficients
+        :return:
+        """
+        coefficients = {}
+        for t in self.timesteps():
+            for p in self._uncertain_parameters:
+                for r in self._result_set.result_keys():
+                    coefficients[(t, p, r)] = self.get_spearman_rank_correlation_coefficient_time(t, p, r)
+        return coefficients
+
+    def get_spearman_rank_correlation_coefficient_time(self, time, parameter, result):
+        """
+        For non-linear monotonic trends
+        :param parameter:
+        :param result:
+        :return:
+        """
+        assert parameter in self._uncertain_parameters
+        return stats.spearmanr(self._result_set.parameter_samples(parameter), self._result_set.result_data(time, result))
