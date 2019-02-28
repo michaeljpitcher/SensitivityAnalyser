@@ -2,35 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="44da6d78-ec79-46e9-a3fc-b07274a127c8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/sensitivity/analyse/correlation/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/analyse/correlation/scattergraph.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/analyse/lhs/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/analyse/visual/scatterplot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/correlation/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/correlation/scatterlab.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/correlation/scatterrun.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/lhs/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sensitivity/run/lhs/lhs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sandbox3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sensitivity/run/efast/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sensitivity/run/efast/efast.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sensitivity/run/efast/efastlab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sandbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/sandbox.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/analyse/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/analyse/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/analyse/lhsanalyser.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/data/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/data/parameterset.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/data/resultset.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/evaluate/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/evaluate/lhs.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/evaluate/outputfolder.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/folder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/evaluate/scatterplotter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/sample/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/sample/lhslab.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/run/lhs/lhslab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/visual/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/analyse/visual/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensitivity/visual/scatterplot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_data/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_data/test_parameter_set.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensitivity/analyse/results/resultset.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/analyse/results/resultset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensitivity/run/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensitivity/run/__init__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -41,21 +22,60 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sensitivity/run/correlation/scatterlab.py">
+        <entry file="file://$PROJECT_DIR$/sandbox.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="36" />
+            <state relative-caret-position="735">
+              <caret line="51" column="20" selection-start-line="51" selection-start-column="20" selection-end-line="51" selection-end-column="41" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sensitivity/run/correlation/scatterrun.py">
+        <entry file="file://$PROJECT_DIR$/sandbox3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
+            <state relative-caret-position="261">
+              <caret line="29" column="92" selection-start-line="29" selection-start-column="92" selection-end-line="29" selection-end-column="92" />
               <folding>
-                <element signature="e#0#32#0" expanded="true" />
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sensitivity/run/parameters/parameterset.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="13" selection-start-line="13" selection-end-line="13" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sensitivity/run/efast/efast.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="238">
+              <caret line="27" selection-start-line="27" selection-end-line="27" />
+              <folding>
+                <element signature="e#0#50#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/sensitivity/run/efast/efastlab.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="387">
+              <caret line="89" column="68" lean-forward="true" selection-start-line="89" selection-start-column="68" selection-end-line="89" selection-end-column="68" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -64,68 +84,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/progressepyc/progresslab.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="29" column="32" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
+            <state relative-caret-position="45">
+              <caret line="4" column="20" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/progressepyc/progressrepeatedexperiment.py">
+        <entry file="file://$USER_HOME$/Library/Python/2.7/lib/python/site-packages/epyc/lab.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
-              <caret line="40" column="23" selection-start-line="40" selection-start-column="23" selection-end-line="40" selection-end-column="23" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-121">
-              <caret line="74" column="53" selection-start-line="74" selection-start-column="53" selection-end-line="74" selection-end-column="53" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/sensitivity/analyse/results/resultset.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="674">
-              <caret line="71" lean-forward="true" selection-start-line="71" selection-end-line="71" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sandbox2.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sandbox.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="735">
-              <caret line="49" column="15" selection-start-line="49" selection-start-column="15" selection-end-line="49" selection-end-column="15" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="135">
+              <caret line="9" selection-start-line="9" selection-end-line="10" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -153,12 +122,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/test/test_data/test_parameter_set.py" />
-        <option value="$PROJECT_DIR$/sensitivity/visual/__init__.py" />
-        <option value="$PROJECT_DIR$/sensitivity/data/outputfolder.py" />
-        <option value="$PROJECT_DIR$/sensitivity/data/lhsresults.py" />
-        <option value="$PROJECT_DIR$/sensitivity/__init__.py" />
-        <option value="$PROJECT_DIR$/sensitivity/data/jsondatareader.py" />
         <option value="$PROJECT_DIR$/sensitivity/data/parameterset.py" />
         <option value="$PROJECT_DIR$/sensitivity/data/resultset2.py" />
         <option value="$PROJECT_DIR$/sensitivity/data/__init__.py" />
@@ -198,16 +161,22 @@
         <option value="$PROJECT_DIR$/sens/analyse/correlation/scattergraph.py" />
         <option value="$PROJECT_DIR$/sens/analyse/results/resultset.py" />
         <option value="$PROJECT_DIR$/sens/analyse/lhs/lhsanalyser.py" />
-        <option value="$PROJECT_DIR$/sandbox2.py" />
-        <option value="$PROJECT_DIR$/sandbox.py" />
         <option value="$PROJECT_DIR$/progressepyc/progresslab.py" />
         <option value="$PROJECT_DIR$/progressepyc/progressrepeatedexperiment.py" />
-        <option value="$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py" />
+        <option value="$PROJECT_DIR$/sensitivity/analyse/correlation/scattergraph.py" />
         <option value="$PROJECT_DIR$/sensitivity/analyse/results/resultset.py" />
+        <option value="$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py" />
+        <option value="$PROJECT_DIR$/sandbox2.py" />
+        <option value="$PROJECT_DIR$/sandbox.py" />
+        <option value="$PROJECT_DIR$/sensitivity/run/efast/__init__.py" />
+        <option value="$PROJECT_DIR$/sensitivity/run/__init__.py" />
+        <option value="$PROJECT_DIR$/sandbox3.py" />
+        <option value="$PROJECT_DIR$/sensitivity/run/efast/efast.py" />
+        <option value="$PROJECT_DIR$/sensitivity/run/efast/efastlab.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="23" />
     <option name="width" value="1920" />
     <option name="height" value="984" />
@@ -217,7 +186,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -228,7 +196,13 @@
             <path>
               <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
               <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
-              <item name="progressepyc" type="462c0819:PsiDirectoryNode" />
+              <item name="experiments" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
+              <item name="experiments" type="462c0819:PsiDirectoryNode" />
+              <item name="efast" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
@@ -239,39 +213,54 @@
               <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
               <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
               <item name="sensitivity" type="462c0819:PsiDirectoryNode" />
-              <item name="analyse" type="462c0819:PsiDirectoryNode" />
+              <item name="run" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
               <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
               <item name="sensitivity" type="462c0819:PsiDirectoryNode" />
-              <item name="analyse" type="462c0819:PsiDirectoryNode" />
-              <item name="results" type="462c0819:PsiDirectoryNode" />
+              <item name="run" type="462c0819:PsiDirectoryNode" />
+              <item name="efast" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
+              <item name="sensitivity" type="462c0819:PsiDirectoryNode" />
+              <item name="run" type="462c0819:PsiDirectoryNode" />
+              <item name="lhs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensitivityAnalyser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensitivityAnalyser" type="462c0819:PsiDirectoryNode" />
+              <item name="sensitivity" type="462c0819:PsiDirectoryNode" />
+              <item name="run" type="462c0819:PsiDirectoryNode" />
+              <item name="parameters" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/sens/analyse/lhs" />
-      <recent name="$PROJECT_DIR$/sens/run/lhs" />
-      <recent name="$PROJECT_DIR$/sensitivity/sample" />
-      <recent name="$PROJECT_DIR$/sens/analyse" />
-      <recent name="$PROJECT_DIR$/sens/run" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/sens/analyse/correlation" />
       <recent name="$PROJECT_DIR$/sens/run/correlation" />
       <recent name="$PROJECT_DIR$/sens/analyse" />
       <recent name="$PROJECT_DIR$/sens/run" />
       <recent name="$PROJECT_DIR$/sensitivity/evaluate" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sensitivity/run/efast" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/sens/analyse/lhs" />
+      <recent name="$PROJECT_DIR$/sens/run/lhs" />
+      <recent name="$PROJECT_DIR$/sensitivity/sample" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -286,7 +275,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.sandbox2">
+  <component name="RunManager" selected="Python.sandbox3">
     <configuration name="sandbox" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SensitivityAnalyser" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -329,7 +318,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="sensitivityanalyser" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="sandbox3" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SensitivityAnalyser" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -337,11 +326,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sensitivity" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sensitivity/latinhypercubeSA.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sandbox3.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -371,7 +360,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests in test" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests in /Users/michael/Documents/PhD/Projects/SensitivityAnalyser/test" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="SensitivityAnalyser" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -388,17 +377,17 @@
     <list>
       <item itemvalue="Python.sandbox" />
       <item itemvalue="Python.sandbox2" />
-      <item itemvalue="Python.sensitivityanalyser" />
       <item itemvalue="Python.test" />
-      <item itemvalue="Python tests.Unittests in test" />
+      <item itemvalue="Python.sandbox3" />
+      <item itemvalue="Python tests.Unittests in /Users/michael/Documents/PhD/Projects/SensitivityAnalyser/test" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.sandbox2" />
+        <item itemvalue="Python.sandbox3" />
         <item itemvalue="Python.sandbox" />
+        <item itemvalue="Python.sandbox2" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python tests.Unittests in test" />
-        <item itemvalue="Python.sensitivityanalyser" />
+        <item itemvalue="Python tests.Unittests in /Users/michael/Documents/PhD/Projects/SensitivityAnalyser/test" />
       </list>
     </recent_temporary>
   </component>
@@ -457,23 +446,23 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1920" height="984" extended-state="6" />
+    <frame x="0" y="23" width="1920" height="986" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21484992" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20484465" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4997367" weight="0.32885906" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49815693" weight="0.3131991" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4997367" weight="0.39709172" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49710375" visible="true" weight="0.29642057" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4997367" weight="0.396861" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49710375" weight="0.30872482" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5018431" side_tool="true" visible="true" weight="0.08744395" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32922733" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50289625" side_tool="true" weight="0.29642057" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32847533" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -510,51 +499,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/lhs/x_random.png" />
-    <entry file="file://$PROJECT_DIR$/lhs/y_random_y.png" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/evaluate/__init__.py" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/lhsanalyser.py" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_time_0.png" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_time_1.png" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_time_2.png" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_time_3.png" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_squared_3.png" />
-    <entry file="file://$PROJECT_DIR$/scatter2/x_x_squared_0.png" />
-    <entry file="file://$PROJECT_DIR$/test.py" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/sample/scatterlab.py" />
-    <entry file="file://$USER_HOME$/Library/Python/2.7/lib/python/site-packages/epyc/repeatedexperiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-144">
-          <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/results/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="23" selection-start-column="23" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/run/parameters/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="26" selection-start-column="26" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/evaluate/outputfolder.py" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/data/parameterset.py" />
-    <entry file="file://$PROJECT_DIR$/experiments/scatter_new/scatter.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2018.3/python_stubs/348993582/__builtin__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="3365" column="8" selection-start-line="3365" selection-start-column="8" selection-end-line="3365" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/collections.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="112">
@@ -571,9 +515,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/experiments/scatter_new/x_random.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_new/x_random.png" />
     <entry file="file://$PROJECT_DIR$/sensitivity/run/correlation/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -596,26 +538,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="3" column="17" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/run/parameters/parameterset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="23" column="8" selection-start-line="23" selection-start-column="8" selection-end-line="23" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/run/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -644,16 +566,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/run/lhs/lhslab.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="36" selection-start-line="2" selection-start-column="36" selection-end-line="2" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sensitivity/analyse/lhs/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -672,13 +584,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sensitivity/data/resultset.py" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/run/lhs/lhs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" selection-start-line="4" selection-end-line="4" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sensitivity/analyse/visual/scatterplot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
@@ -686,23 +591,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/experiments/lhs_new/y_x_squared.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/experiments/lhs_new/y_random_y.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/lhs_new/y_x_squared.png" />
+    <entry file="file://$PROJECT_DIR$/experiments/lhs_new/y_random_y.png" />
     <entry file="file://$PROJECT_DIR$/test/test_data/test_parameter_set.py" />
-    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/correlation/scattergraph.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sensitivity/run/correlation/scatterlab.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -720,13 +611,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/progressepyc/progresslab.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="29" column="32" selection-start-line="29" selection-start-column="32" selection-end-line="29" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/progressepyc/progressrepeatedexperiment.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="231">
@@ -737,30 +621,47 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py">
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/scatter.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x1_random_time_x2_0.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x1_random_x1_0.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_0.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_1.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_2.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_3.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_4.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_5.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments/scatter_time/x3_random_x3_power_time_6.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/numpy/lib/function_base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-121">
-          <caret line="74" column="53" selection-start-line="74" selection-start-column="53" selection-end-line="74" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="180">
+          <caret line="355" selection-start-line="355" selection-end-line="355" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sandbox2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sandbox.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="49" column="15" selection-start-line="49" selection-start-column="15" selection-end-line="49" selection-end-column="15" />
+        <state relative-caret-position="752">
+          <caret line="72" column="23" selection-start-line="72" selection-start-column="23" selection-end-line="72" selection-end-column="23" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -769,8 +670,150 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/sensitivity/analyse/results/resultset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="674">
-          <caret line="71" lean-forward="true" selection-start-line="71" selection-end-line="71" />
+        <state relative-caret-position="1815">
+          <caret line="124" column="40" selection-start-line="124" selection-start-column="40" selection-end-line="124" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/pandas/core/frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38700">
+          <caret line="2670" selection-start-line="2670" selection-end-line="2670" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/pandas/core/indexes/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="29595">
+          <caret line="2036" selection-start-line="2036" selection-end-line="2036" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/pandas/core/common.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5910">
+          <caret line="409" selection-start-line="409" selection-end-line="409" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/correlation/scattergraph.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="930">
+          <caret line="63" column="113" selection-start-line="63" selection-start-column="113" selection-end-line="63" selection-end-column="113" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/analyse/lhs/lhsanalyser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1035">
+          <caret line="69" selection-start-line="69" selection-end-line="69" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/efast/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="10" lean-forward="true" selection-start-line="1" selection-start-column="10" selection-end-line="1" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
+          <folding>
+            <element signature="e#0#24#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sandbox.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="735">
+          <caret line="51" column="20" selection-start-line="51" selection-start-column="20" selection-end-line="51" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/lhs/lhs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="25" column="39" selection-start-line="11" selection-start-column="4" selection-end-line="25" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/lhs/lhslab.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="30" column="29" selection-start-line="30" selection-start-column="29" selection-end-line="30" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/parameters/parameterset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/progressepyc/progresslab.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="4" column="20" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Python/2.7/lib/python/site-packages/epyc/lab.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" selection-start-line="9" selection-end-line="10" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/efast/efast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sandbox3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="261">
+          <caret line="29" column="92" selection-start-line="29" selection-start-column="92" selection-end-line="29" selection-end-column="92" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensitivity/run/efast/efastlab.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="387">
+          <caret line="89" column="68" lean-forward="true" selection-start-line="89" selection-start-column="68" selection-end-line="89" selection-end-column="68" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
