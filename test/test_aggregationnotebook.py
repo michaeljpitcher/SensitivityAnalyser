@@ -30,10 +30,10 @@ class Model(epyc.Experiment):
 class AggregationJSONNotebookTestCase(unittest.TestCase):
 
     def setUp(self):
-        filename = 'aggtest.json'
-        self.notebook = AggregationJSONNotebook(filename, create=True, description=None)
+        self.filename = 'aggtest.json'
 
     def test_add_result(self):
+        self.notebook = AggregationJSONNotebook(self.filename, create=True, description=None)
         lab = epyc.Lab(self.notebook)
         lab[Model.PARAM_X1] = 2
         lab[Model.PARAM_X2] = [2,3,4]
@@ -49,6 +49,16 @@ class AggregationJSONNotebookTestCase(unittest.TestCase):
         self.assertItemsEqual(self.notebook.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
         self.assertItemsEqual(self.notebook.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
 
+    def test_load_from_file(self):
+        nb = AggregationJSONNotebook(self.filename, False)
+
+        self.assertItemsEqual(nb.dataframe_aggregated().columns, Model.SA_PARAMS + Model.SA_RESULTS)
+        self.assertItemsEqual(nb.dataframe_aggregated_parameters(), Model.SA_PARAMS)
+        self.assertItemsEqual(nb.dataframe_aggregated_results(), Model.SA_RESULTS)
+
+        self.assertItemsEqual(nb.uncertain_parameters(), [Model.PARAM_X2, Model.PARAM_X4])
+        self.assertItemsEqual(nb.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
+        self.assertItemsEqual(nb.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
 
 
 if __name__ == '__main__':

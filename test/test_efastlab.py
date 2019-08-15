@@ -2,9 +2,6 @@ import unittest
 from epycsense import *
 import numpy
 import os
-import json
-
-import pandas
 
 
 class Model(epyc.Experiment):
@@ -50,8 +47,11 @@ class EFASTLabTestCase(unittest.TestCase):
 
     def test_parameter_space(self):
         # Set params
-        params = {'a': (0, 10, 'unif'), 'b': (10, 20, 'unif'), 'c': (20, 30, 'unif'), 'd': (30, 40, 'unif'),
-                  'e': (40, 50, 'unif'), 'f':  (50, 60, 'unif'), 'g':(60, 70, 'unif'), 'h': (70, 80, 'unif')}
+        params = {'a': (0, 10, UNIFORM_DISTRIBUTION), 'b': (10, 20, TRIANGE_DISTRIBUTION),
+                  'c': (20, 30, NORMAL_DISTRIBUTION), 'd': (30, 40, LOGNORMAL_DISTRIBUTION),
+                  'e': (40, 50, LOGNORMAL_DISTRIBUTION), 'f': (50, 60, NORMAL_DISTRIBUTION),
+                  'g': (60, 70, TRIANGE_DISTRIBUTION), 'h': (70, 80, UNIFORM_DISTRIBUTION)}
+
         for k,v in params.iteritems():
             self.lab[k] = v
 
