@@ -1,7 +1,7 @@
 import epyc
 import math
 import numpy as np
-import scipy as sp
+import scipy.stats as stats
 
 UNIFORM_DISTRIBUTION = 'uniform_distribution'
 TRIANGE_DISTRIBUTION = 'triangle_distribution'
@@ -29,8 +29,8 @@ def efast_sample_matrix(sample_number, interference, parameters):
         raise ValueError("""
             Sample size N > 4M^2 is required. M=4 by default.""")
 
-    uncertain_params = {p:v for (p,v) in parameters.iteritems() if len(v) > 1}
-    certain_params = {p:v[0] for (p,v) in parameters.iteritems() if len(v) == 1}
+    uncertain_params = {p: v for (p, v) in parameters.iteritems() if len(v) > 1}
+    certain_params = {p: v[0] for (p, v) in parameters.iteritems() if len(v) == 1}
 
     k = len(uncertain_params)
 
@@ -52,7 +52,7 @@ def efast_sample_matrix(sample_number, interference, parameters):
     s = (2 * math.pi / sample_number) * np.arange(sample_number)
 
     # Transformation to get points in the X space
-    X = np.zeros([sample_number * k, k])
+    x = np.zeros([sample_number * k, k])
     omega2 = np.zeros([k])
 
     # Taking each parameter as the parameter of interest
@@ -76,31 +76,33 @@ def efast_sample_matrix(sample_number, interference, parameters):
         # Assign a value (in range [0,1]) to each parameter for each run based on their frequency and phase shift
         for param in range(k):
             g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[param] * s + phi))
-            X[run_numbers, param] = g
+            x[run_numbers, param] = g
 
-    # initializing matrix for converted values
-    conv_params = np.zeros_like(X)
-
+    # Convert 0-1 values into values within the parameter range, based on minima, maxima and distribution. Then
+    # add to the sample list
     samples = []
-    for j in range(X.shape[0]):
+    # Process a sample at a time
+    for j in range(x.shape[0]):
+        # Initialise the sample as the certain parameter values
         sample = certain_params.copy()
-        for p in range(X.shape[1]):
+        # For each uncertain parameter
+        for p in range(x.shape[1]):
             param = uncertain_params.keys()[p]
-            min = uncertain_params[param][0]
-            max = uncertain_params[param][1]
+            minimum_val = uncertain_params[param][0]
+            maximum_val = uncertain_params[param][1]
             dist = uncertain_params[param][2]
-            val = X[j, p]
-            if dist == 'triang':
-                val = sp.stats.triang.ppf(val, c=max, scale=min, loc=0)
-            elif dist == 'unif':
-                val = val * (max - min) + min
-            elif dist == 'norm':
-                val = sp.stats.norm.ppf(val, loc=min, scale=max)
+            val = x[j, p]
+            if dist == TRIANGE_DISTRIBUTION:
+                val = stats.triang.ppf(val, c=maximum_val, scale=minimum_val, loc=0)
+            elif dist == UNIFORM_DISTRIBUTION:
+                val = val * (maximum_val - minimum_val) + minimum_val
+            elif dist == NORMAL_DISTRIBUTION:
+                val = stats.norm.ppf(val, loc=minimum_val, scale=maximum_val)
             # lognormal distribution (ln-space, not base-10)
             # paramters are ln-space mean and standard deviation
-            elif dist == 'lognorm':
+            elif dist == LOGNORMAL_DISTRIBUTION:
                 # checking for valid parameters
-                val = np.exp(sp.stats.norm.ppf(val, loc=min, scale=max))
+                val = np.exp(stats.norm.ppf(val, loc=minimum_val, scale=maximum_val))
             else:
                 valid_dists = ['unif', 'triang', 'norm', 'lognorm']
                 raise ValueError('Distributions: choose one of %s' % ", ".join(valid_dists))
@@ -122,14 +124,17 @@ class EFASTLab(epyc.Lab):
     def set_interference_factor(self, factor):
         self._interference = factor
 
-    def parameterSpace( self ):
+    def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
         with each dict mapping each parameter name to a value.
         :returns: the parameter space as a list of dicts"""
         if len(self._parameters) == 0:
             return []
         else:
-            assert self._sample_number > 0, self._interference > 0
+            assert (self._sample_number > 0), "Sample number invalid: {0}. Set using {1}()"\
+                .format(self._sample_number, self.set_sample_number.__name__)
+            assert (self._interference > 0), "Interference value invalid: {0}. Set using {1}()"\
+                .format(self._interference, self.set_interference_factor.__name__)
             return efast_sample_matrix(self._sample_number, self._interference, self._parameters)
 
 
@@ -145,7 +150,7 @@ class EFASTClusterLab(epyc.ClusterLab):
     def set_interference_factor(self, factor):
         self._interference = factor
 
-    def parameterSpace( self ):
+    def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
         with each dict mapping each parameter name to a value.
         :returns: the parameter space as a list of dicts"""
