@@ -7,10 +7,10 @@ from pandas import DataFrame
 class AggregationJSONNotebook(JSONLabNotebook):
     # TODO - using a JSON notebook, could be just a notebook
     def __init__(self, name, create=True, description=None):
-        JSONLabNotebook.__init__(self, name, create, description)
         # TODO - aggregated results work a little differently to results: it's a list not a dict as we don't use
         #  parameters as dict index, and we don't have metadata (since that only exists for individual repetitions)
         self._aggregated_results = []
+        JSONLabNotebook.__init__(self, name, create, description)
 
     def uncertain_parameters(self):
         df = self.dataframe_aggregated_parameters()
@@ -42,6 +42,14 @@ class AggregationJSONNotebook(JSONLabNotebook):
             self._aggregated_results.append({Experiment.PARAMETERS: result[Experiment.PARAMETERS],
                                              Experiment.RESULTS: aggregation})
         JSONLabNotebook.addResult(self, result, jobids)
+
+    def _load( self, fn ):
+        JSONLabNotebook._load(self, fn)
+        # TODO - probably doesn't work for non-repetitions
+        for r in self._results.values():
+            aggregation = self._get_results_for_row(r)
+            self._aggregated_results.append({Experiment.PARAMETERS: r[0][Experiment.PARAMETERS],
+                                             Experiment.RESULTS: aggregation})
 
     def results_aggregated(self):
         return self._aggregated_results
