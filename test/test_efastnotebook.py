@@ -140,39 +140,37 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
     def setUp(self):
         self.filename = 'efastlabtest.json'
 
-    # def tearDown(self):
-    #     # # Get rid of json file
-    #     if os.path.exists(self.filename):
-    #         os.remove(self.filename)
+    def tearDown(self):
+        # # Get rid of json file
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
 
     def test_analyse(self):
-        # nb_pre = EFASTJSONNotebook(self.filename, True)
-        # self.lab = EFASTLab(nb_pre)
-        #
-        # model = LotkaVolterraModel()
-        # self.lab[LotkaVolterraModel.PARAM_ALPHA] = [1.5, 0.01, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_BETA] = [1, 0.2, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_SIGMA] = [3, 0.2, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_DELTA] = [1, 0.01, NORMAL_DISTRIBUTION]
-        #
-        # self.lab[LotkaVolterraModel.INIT_Q] = 10
-        # self.lab[LotkaVolterraModel.INIT_P] = 5
-        #
-        # model.set_time_params(20, 21)
-        #
-        # resamples = 1  # NR
-        # runs = 257  # NS
-        # mi = 4.0
-        #
-        # self.lab.set_sample_number(runs)
-        # self.lab.set_interference_factor(mi)
-        #
-        # self.lab.runExperiment(RepeatedExperiment(model, 2))
+        nb_pre = EFASTJSONNotebook(self.filename, True)
+        self.lab = EFASTLab(nb_pre)
+
+        model = LotkaVolterraModel()
+        self.lab[LotkaVolterraModel.PARAM_ALPHA] = [1.5, 0.01, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_BETA] = [1, 0.2, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_SIGMA] = [3, 0.2, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_DELTA] = [1, 0.01, NORMAL_DISTRIBUTION]
+
+        self.lab[LotkaVolterraModel.INIT_Q] = 10
+        self.lab[LotkaVolterraModel.INIT_P] = 5
+
+        model.set_time_params(20, 21)
+
+        resamples = 1  # NR
+        runs = 257  # NS
+        mi = 4.0
+
+        self.lab.set_sample_number(runs)
+        self.lab.set_interference_factor(mi)
+
+        self.lab.runExperiment(RepeatedExperiment(model, 2))
 
         nb_post = EFASTJSONNotebook(self.filename, False)
         res_s1, res_st = nb_post.analyse()
-
-        print
 
         s1_vals = [res_s1[('prey',p)] for p in ['alpha','beta','sigma','delta']]
         st_vals = [res_st[('prey',p)] for p in ['alpha','beta','sigma','delta']]
@@ -194,6 +192,17 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
         plt.legend((p1[0], p2[0]), (r'$S_1$', r'$S_T$'))
 
         plt.savefig("LV.png")
+
+        # Values derived from Fig 4 of Marino S, Hogue IB, Ray CJ, Kirschner DE. A methodology for performing global
+        # uncertainty and sensitivity analysis in systems biology. J Theor Biol 2008; 254: 178-96.
+        self.assertTrue(0 < res_s1[('prey', 'alpha')] < 0.01)
+        self.assertTrue(0 < res_st[('prey', 'alpha')] < 0.2)
+        self.assertTrue(0.1 < res_s1[('prey', 'beta')] < 0.3)
+        self.assertTrue(0.6 < res_st[('prey', 'beta')] < 0.8)
+        self.assertTrue(0.2 < res_s1[('prey', 'sigma')] < 0.4)
+        self.assertTrue(0.7 < res_st[('prey', 'sigma')] < 0.9)
+        self.assertTrue(0 < res_s1[('prey', 'delta')] < 0.01)
+        self.assertTrue(0 < res_st[('prey', 'delta')] < 0.2)
 
 
 if __name__ == '__main__':

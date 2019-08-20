@@ -20,7 +20,7 @@ class AggregationJSONNotebook(JSONLabNotebook):
 
     def certain_parameters(self):
         df = self.dataframe_aggregated()
-        return [q for q in self._parameters if len(set(df[q])) > 1]
+        return [q for q in self._parameters if len(set(df[q])) == 1]
 
     def result_keys(self):
         return self._result_keys

@@ -32,6 +32,11 @@ class AggregationJSONNotebookTestCase(unittest.TestCase):
     def setUp(self):
         self.filename = 'aggtest.json'
 
+    def tearDown(self):
+        # # Get rid of json file
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
     def test_single(self):
         # TODO - currently don't cater for a single run (may not need to)
         pass
@@ -81,18 +86,15 @@ class AggregationJSONNotebookTestCase(unittest.TestCase):
         lab.runExperiment(RepeatedExperiment(Model(), 10))
 
         self.assertItemsEqual(nb_pre.dataframe_aggregated().columns, Model.SA_PARAMS + Model.SA_RESULTS)
-        self.assertItemsEqual(nb_pre.dataframe_aggregated_parameters(), Model.SA_PARAMS)
-        self.assertItemsEqual(nb_pre.dataframe_aggregated_results(), Model.SA_RESULTS)
+
+        print nb_pre.certain_parameters()
 
         self.assertItemsEqual(nb_pre.uncertain_parameters(), [Model.PARAM_X2, Model.PARAM_X4])
-        self.assertItemsEqual(nb_pre.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
         self.assertItemsEqual(nb_pre.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
 
         # Load from existing file
         nb_post = AggregationJSONNotebook(self.filename, create=False)
         self.assertItemsEqual(nb_post.dataframe_aggregated().columns, Model.SA_PARAMS + Model.SA_RESULTS)
-        self.assertItemsEqual(nb_post.dataframe_aggregated_parameters(), Model.SA_PARAMS)
-        self.assertItemsEqual(nb_post.dataframe_aggregated_results(), Model.SA_RESULTS)
 
         self.assertItemsEqual(nb_post.uncertain_parameters(), [Model.PARAM_X2, Model.PARAM_X4])
         self.assertItemsEqual(nb_post.certain_parameters(), [Model.PARAM_X1, Model.PARAM_X3])
