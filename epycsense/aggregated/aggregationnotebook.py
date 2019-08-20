@@ -10,18 +10,20 @@ class AggregationJSONNotebook(JSONLabNotebook):
         # TODO - aggregated results work a little differently to results: it's a list not a dict as we don't use
         #  parameters as dict index, and we don't have metadata (since that only exists for individual repetitions)
         self._aggregated_results = []
+        self._parameters = []
+        self._result_keys = []
         JSONLabNotebook.__init__(self, name, create, description)
 
     def uncertain_parameters(self):
-        df = self.dataframe_aggregated_parameters()
-        return [q for q in df if len(set(df[q])) > 1]
+        df = self.dataframe_aggregated()
+        return [q for q in self._parameters if len(set(df[q])) > 1]
 
     def certain_parameters(self):
-        df = self.dataframe_aggregated_parameters()
-        return [q for q in df if len(set(df[q])) == 1]
+        df = self.dataframe_aggregated()
+        return [q for q in self._parameters if len(set(df[q])) > 1]
 
     def result_keys(self):
-        return self.dataframe_aggregated_results().columns
+        return self._result_keys
 
     def _get_results_for_row(self, repetition_data):
         """
@@ -36,11 +38,19 @@ class AggregationJSONNotebook(JSONLabNotebook):
             return {r: numpy.mean([rep[Experiment.RESULTS][r] for rep in repetition_data])
                     for r in repetition_data[0][Experiment.RESULTS]}
 
+    def _record_aggregated_row(self, parameters, agg_results):
+        self._parameters += [p for p in parameters if p not in self._parameters]
+        self._result_keys += [r for r in agg_results if r not in self._result_keys]
+        self._aggregated_results.append({Experiment.PARAMETERS: parameters,
+                                         Experiment.RESULTS: agg_results})
+
     def addResult( self, result, jobids = None ):
-        if isinstance(result[Experiment.RESULTS], list):
+        # TODO - doesn't work for non-repetitions
+        # Make sure all repetitions have succeeded, can't aggregate if a failure has occurred
+        if isinstance(result[Experiment.RESULTS], list) \
+          and all([r[Experiment.METADATA]['status'] for r in result[Experiment.RESULTS]]):
             aggregation = self._get_results_for_row(result[Experiment.RESULTS])
-            self._aggregated_results.append({Experiment.PARAMETERS: result[Experiment.PARAMETERS],
-                                             Experiment.RESULTS: aggregation})
+            self._record_aggregated_row(result[Experiment.PARAMETERS], aggregation)
         JSONLabNotebook.addResult(self, result, jobids)
 
     def _load( self, fn ):
@@ -48,8 +58,7 @@ class AggregationJSONNotebook(JSONLabNotebook):
         # TODO - probably doesn't work for non-repetitions
         for r in self._results.values():
             aggregation = self._get_results_for_row(r)
-            self._aggregated_results.append({Experiment.PARAMETERS: r[0][Experiment.PARAMETERS],
-                                             Experiment.RESULTS: aggregation})
+            self._record_aggregated_row(r[0][Experiment.PARAMETERS], aggregation)
 
     def results_aggregated(self):
         return self._aggregated_results
@@ -63,18 +72,18 @@ class AggregationJSONNotebook(JSONLabNotebook):
         records = [r for r in map(extract, self._aggregated_results) if r is not None]
         return DataFrame.from_records(records)
 
-    def dataframe_aggregated_parameters(self):
-        def extract(r):
-            rd = r[Experiment.PARAMETERS].copy()
-            return rd
-
-        records = [r for r in map(extract, self._aggregated_results) if r is not None]
-        return DataFrame.from_records(records)
-
-    def dataframe_aggregated_results(self):
-        def extract(r):
-            rd = r[Experiment.RESULTS].copy()
-            return rd
-
-        records = [r for r in map(extract, self._aggregated_results) if r is not None]
-        return DataFrame.from_records(records)
+    # def dataframe_aggregated_parameters(self):
+    #     def extract(r):
+    #         rd = r[Experiment.PARAMETERS].copy()
+    #         return rd
+    #
+    #     records = [r for r in map(extract, self._aggregated_results) if r is not None]
+    #     return DataFrame.from_records(records)
+    #
+    # def dataframe_aggregated_results(self):
+    #     def extract(r):
+    #         rd = r[Experiment.RESULTS].copy()
+    #         return rd
+    #
+    #     records = [r for r in map(extract, self._aggregated_results) if r is not None]
+    #     return DataFrame.from_records(records)
