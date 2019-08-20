@@ -9,6 +9,7 @@ LOGNORMAL_DISTRIBUTION = 'lognormal_distribution'
 
 RUN_NUMBER = 'run_number'
 PARAMETER_OF_INTEREST = 'parameter_of_interest'
+DUMMY = 'dummy'
 
 # Reference material for EFAST:
 #
@@ -35,18 +36,19 @@ def efast_sample_matrix(sample_number, interference, parameters):
 
     Code modified from SALib (due to an inability to install) https://salib.readthedocs.io/en/latest/
 
-    :param sample_number: Number of samples
+    :param sample_number: Number of samples per parameter
     :param interference: The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition
     :param parameters: parameters and values (from epyc)
     :return:
     """
-    if sample_number <= 4 * interference ** 2:
-        raise ValueError("""
-            Sample size N > 4M^2 is required. M=4 by default.""")
+    assert sample_number > 4 * interference ** 2, "Sample size N > 4M^2 is required. M=4 by default."
 
     # Determine certainty of parameters
     uncertain_params = [(p, v[0], v[1], v[2]) for (p, v) in parameters.iteritems() if len(v) > 1]
+    # Add a dummy parameter (Marino et al., 2008)
+    uncertain_params.append((DUMMY, 0, 10, UNIFORM_DISTRIBUTION))
+    # Get parameters that only have one value
     certain_params = {p: v[0] for (p, v) in parameters.iteritems() if len(v) == 1}
     # Number of uncertain parameters
     k = len(uncertain_params)

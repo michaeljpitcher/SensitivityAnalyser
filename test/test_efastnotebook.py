@@ -172,11 +172,11 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
         nb_post = EFASTJSONNotebook(self.filename, False)
         res_s1, res_st = nb_post.analyse()
 
-        s1_vals = [res_s1[('prey',p)] for p in ['alpha','beta','sigma','delta']]
-        st_vals = [res_st[('prey',p)] for p in ['alpha','beta','sigma','delta']]
+        s1_vals = [res_s1[('prey',p)] for p in ['alpha','beta','sigma','delta','dummy']]
+        st_vals = [res_st[('prey',p)] for p in ['alpha','beta','sigma','delta','dummy']]
         N = len(s1_vals)
-        menStd = (0, 0, 0, 0)
-        womenStd = (0, 0, 0, 0)
+        menStd = (0, 0, 0, 0, 0)
+        womenStd = (0, 0, 0, 0, 0)
         ind = np.arange(N)  # the x locations for the groups
         width = 0.8  # the width of the bars: can also be len(x) sequence
 
@@ -187,7 +187,7 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
 
         plt.ylabel('eFAST sensitivity')
         plt.title('Lotka-Volterra EFAST')
-        plt.xticks(ind, (r'$\alpha$', r'$\beta$', r'$\sigma$', r'$\delta$'))
+        plt.xticks(ind, (r'$\alpha$', r'$\beta$', r'$\sigma$', r'$\delta$', r'$dummy$'))
         # plt.yticks(np.arange(0, 81, 10))
         plt.legend((p1[0], p2[0]), (r'$S_1$', r'$S_T$'))
 
