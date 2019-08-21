@@ -89,7 +89,7 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         params.remove(EFASTJSONNotebook.RESAMPLE_NUMBER)
         return params
 
-    def analyse(self):
+    def generate_sensitivity_indices(self):
         """
         Performs the Fourier Amplitude Sensitivity Test (FAST) on model outputs.
 
@@ -112,8 +112,6 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         J Theor Biol 2008; 254: 178-96. doi:10.1016/j.jtbi.2008.04.011
         :return:
         """
-        # TODO - resamples?
-
         num_uncertain_params = len(self.uncertain_parameters())
 
         # Reduce to only the actual results, sort by parameter of interest, then resample, then run number
@@ -138,7 +136,9 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         else:
             omega[1:] = np.arange(num_uncertain_params - 1) % m + 1
 
+        # First-order sensitivity indices
         S1 = {(rk, p): [] for (rk,p) in itertools.product(self._result_keys, self.uncertain_parameters())}
+        # Total-order sensitivity indices
         ST = {(rk, p): [] for (rk,p) in itertools.product(self._result_keys, self.uncertain_parameters())}
 
         # Loop through each uncertain parameter
