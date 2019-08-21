@@ -101,9 +101,9 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
                                 sample_number*(parameter_of_interest_pos*resample_number + rs + 1))
 
             # random phase shift on [0, 2pi) following [Saltelli et al. 1999 - Sect 2.2]
-            phi = 2 * math.pi * np.random.rand()
 
             for param in range(k):
+                phi = 2 * math.pi * np.random.rand()
                 g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[param] * s + phi))
                 x[run_numbers, param] = g
 
