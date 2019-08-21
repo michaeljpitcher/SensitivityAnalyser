@@ -34,7 +34,7 @@ class EFASTLabTestCase(unittest.TestCase):
 
     def setUp(self):
         self.filename = 'efastlabtest.json'
-        self.nb = epyc.JSONLabNotebook(self.filename, True)
+        self.nb = EFASTJSONNotebook(self.filename, True)
         self.lab = EFASTLab(self.nb)
 
     def tearDown(self):
@@ -47,10 +47,10 @@ class EFASTLabTestCase(unittest.TestCase):
 
     def test_parameter_space(self):
         # Set params
-        params = {'a': (0, 10, UNIFORM_DISTRIBUTION), 'b': (10, 20, TRIANGE_DISTRIBUTION),
-                  'c': (20, 30, NORMAL_DISTRIBUTION), 'd': (30, 40, LOGNORMAL_DISTRIBUTION),
-                  'e': (40, 50, LOGNORMAL_DISTRIBUTION), 'f': (50, 60, NORMAL_DISTRIBUTION),
-                  'g': (60, 70, TRIANGE_DISTRIBUTION), 'h': (70, 80, UNIFORM_DISTRIBUTION)}
+        params = {'a': (0, 10, UNIFORM_DISTRIBUTION),
+                  'b': (20, 0.5, NORMAL_DISTRIBUTION), 'c': (30, 0.6, LOGNORMAL_DISTRIBUTION),
+                  'd': (40, 0.7, LOGNORMAL_DISTRIBUTION), 'e': (50, 0.8, NORMAL_DISTRIBUTION),
+                  'f': (70, 80, UNIFORM_DISTRIBUTION)}
 
         for k,v in params.iteritems():
             self.lab[k] = v
@@ -62,15 +62,21 @@ class EFASTLabTestCase(unittest.TestCase):
 
         self.lab.set_sample_number(257)
         self.lab.set_interference_factor(4)
+        self.lab.set_resample_number(5)
 
         ps = self.lab.parameterSpace()
 
-        # All we can check is value falls between min and max since random numbers are involved
+        # Has dummy parameter in so == len(params) + 1
+        self.assertEqual(len(ps), (len(params) + 1) * 5 * 257)
+
+        # All we can check is value falls within expected range since random numbers are involved
         for row in ps:
-            for p, (min,max,_) in params.iteritems():
-                self.assertTrue(min <= row[p] <= max)
-
-
+            for p, (min, max, dist) in params.iteritems():
+                if dist == UNIFORM_DISTRIBUTION:
+                    self.assertTrue(min <= row[p] <= max)
+                if dist == NORMAL_DISTRIBUTION:
+                    # TODO - testing a normal distribution
+                    pass
 
 # TODO - testing cluster would require an ipcluster to be running
 

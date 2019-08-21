@@ -1,22 +1,27 @@
 import numpy as np
 import math
 import json
+import itertools
 from ..aggregated.aggregationnotebook import *
-from .efastlab import RUN_NUMBER, PARAMETER_OF_INTEREST
 from epyc.jsonlabnotebook import MetadataEncoder
 
 
 class EFASTJSONNotebook(AggregationJSONNotebook):
+    RUN_NUMBER = 'run_number'
+    PARAMETER_OF_INTEREST = 'parameter_of_interest'
+    DUMMY = 'dummy'
+    INTERFERENCE_FACTOR = 'interference_factor'
+    RESAMPLE_NUMBER = 'resample_number'
+    SAMPLE_NUMBER = 'sample_number'
+
     """
     epyc Notebook for analysing results out of an epyc.EFastLab or epyc.EFastClusterLab
     """
 
-    INTERFERENCE_FACTOR = 'interference_factor'
-    SAMPLE_NUMBER = 'sample_number'
-
     def __init__(self, name, create=True, description=None):
         self._interference_factor = 0
         self._sample_number = 0
+        self._resample_number = 0
         AggregationJSONNotebook.__init__(self, name, create, description)
 
     def set_interference_factor(self, factor):
@@ -31,6 +36,12 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
     def sample_number(self):
         return self._sample_number
 
+    def set_resample_number(self, resamples):
+        self._resample_number = resamples
+
+    def resample_number(self):
+        return self._resample_number
+
     def _save( self, fn ):
         """Persist the notebook to the given file. Saves the interference factor and sample number within the JSON file
         so it can be loaded in future.
@@ -42,7 +53,8 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
                         'pending': self._pending,
                         'results': self._results,
                         EFASTJSONNotebook.INTERFERENCE_FACTOR: self._interference_factor,
-                        EFASTJSONNotebook.SAMPLE_NUMBER: self._sample_number},
+                        EFASTJSONNotebook.SAMPLE_NUMBER: self._sample_number,
+                        EFASTJSONNotebook.RESAMPLE_NUMBER: self._resample_number,},
                        indent=4,
                        cls=MetadataEncoder)
 
@@ -64,6 +76,7 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
             j = json.loads(s)
             self._interference_factor = j[EFASTJSONNotebook.INTERFERENCE_FACTOR]
             self._sample_number = j[EFASTJSONNotebook.SAMPLE_NUMBER]
+            self._resample_number = j[EFASTJSONNotebook.RESAMPLE_NUMBER]
 
     def uncertain_parameters(self):
         """
@@ -71,8 +84,9 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         :return:
         """
         params = AggregationJSONNotebook.uncertain_parameters(self)
-        params.remove(RUN_NUMBER)
-        params.remove(PARAMETER_OF_INTEREST)
+        params.remove(EFASTJSONNotebook.RUN_NUMBER)
+        params.remove(EFASTJSONNotebook.PARAMETER_OF_INTEREST)
+        params.remove(EFASTJSONNotebook.RESAMPLE_NUMBER)
         return params
 
     def analyse(self):
@@ -102,13 +116,15 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
 
         num_uncertain_params = len(self.uncertain_parameters())
 
-        # Reduce to only the actual results
-        data = self.dataframe_aggregated().sort_values(by=RUN_NUMBER)
-        params_of_interest = data[PARAMETER_OF_INTEREST]
+        # Reduce to only the actual results, sort by parameter of interest, then resample, then run number
+        data = self.dataframe_aggregated().sort_values(by=[EFASTJSONNotebook.PARAMETER_OF_INTEREST,
+                                                           EFASTJSONNotebook.RESAMPLE_NUMBER,
+                                                           EFASTJSONNotebook.RUN_NUMBER])
+        params_of_interest = data[EFASTJSONNotebook.PARAMETER_OF_INTEREST]
         results = data[self._result_keys]
 
         # Check we have all expected results (NS * k)
-        assert len(results) == num_uncertain_params * self._sample_number, "Invalid data length"
+        assert len(results) == num_uncertain_params * self._sample_number * self._resample_number, "Invalid data length"
 
         # Recreate the frequency vector used in the sampling
         omega = np.zeros([num_uncertain_params])
@@ -122,29 +138,33 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         else:
             omega[1:] = np.arange(num_uncertain_params - 1) % m + 1
 
-        S1 = {}
-        ST = {}
+        S1 = {(rk, p): [] for (rk,p) in itertools.product(self._result_keys, self.uncertain_parameters())}
+        ST = {(rk, p): [] for (rk,p) in itertools.product(self._result_keys, self.uncertain_parameters())}
 
         # Loop through each uncertain parameter
         for i in range(num_uncertain_params):
-            # Find the results where the parameter was the parameter of interest (i.e. had high frequency)
-            relevant_results = results[i*self._sample_number:(i+1)*self._sample_number]
-            # Check it was the parameter of interest for all rows
-            poi = set(params_of_interest[i*self._sample_number:(i+1)*self._sample_number])
-            assert len(poi) == 1
-            poi = poi.pop()
-            for result_key in relevant_results.columns:
-                output_data = relevant_results[result_key]
-                f = np.fft.fft(output_data)
-                Sp = np.power(np.absolute(f[np.arange(1, int((self._sample_number + 1) / 2))]) / self._sample_number, 2)
+            for rs in range(self._resample_number):
+                # Get the relevant results for this parameter of interest and resample number
+                relevant_results = results[self._sample_number * (i + rs * self._resample_number):
+                                           self._sample_number * (i + rs * self._resample_number + 1)]
+                # Check it was the parameter of interest for all rows
+                poi = set(params_of_interest[self._sample_number * (i + rs * self._resample_number):
+                                             self._sample_number * (i + rs * self._resample_number + 1)])
+                assert len(poi) == 1
 
-                q = np.arange(1, int(self._interference_factor) + 1) * int(omega[0]) - 1
-                V = 2 * np.sum(Sp)
-                D1 = 2 * np.sum(Sp[q])
-                S1[(result_key, poi)] = D1 / V
+                poi = poi.pop()
+                for result_key in relevant_results.columns:
+                    output_data = relevant_results[result_key]
+                    f = np.fft.fft(output_data)
+                    Sp = np.power(np.absolute(f[np.arange(1, int((self._sample_number + 1) / 2))]) / self._sample_number, 2)
 
-                q2 = np.arange(int(omega[0] / 2))
-                Dt = 2 * sum(Sp[q2])
-                ST[(result_key, poi)] = 1 - Dt/V
+                    q = np.arange(1, int(self._interference_factor) + 1) * int(omega[0]) - 1
+                    V = 2 * np.sum(Sp)
+                    D1 = 2 * np.sum(Sp[q])
+                    S1[(result_key, poi)].append(D1 / V)
+
+                    q2 = np.arange(int(omega[0] / 2))
+                    Dt = 2 * sum(Sp[q2])
+                    ST[(result_key, poi)].append(1 - Dt/V)
 
         return S1, ST

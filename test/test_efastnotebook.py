@@ -140,10 +140,10 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
     def setUp(self):
         self.filename = 'efastlabtest.json'
 
-    def tearDown(self):
-        # # Get rid of json file
-        if os.path.exists(self.filename):
-            os.remove(self.filename)
+    # def tearDown(self):
+    #     # # Get rid of json file
+    #     if os.path.exists(self.filename):
+    #         os.remove(self.filename)
 
     def test_analyse(self):
         nb_pre = EFASTJSONNotebook(self.filename, True)
@@ -160,49 +160,52 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
 
         model.set_time_params(20, 21)
 
-        resamples = 1  # NR
+        resamples = 5  # NR
         runs = 257  # NS
         mi = 4.0
 
         self.lab.set_sample_number(runs)
+        self.lab.set_resample_number(resamples)
         self.lab.set_interference_factor(mi)
 
+        print "Running Experiment"
         self.lab.runExperiment(RepeatedExperiment(model, 2))
 
         nb_post = EFASTJSONNotebook(self.filename, False)
+        print "Analysing Experiment Results"
         res_s1, res_st = nb_post.analyse()
 
-        s1_vals = [res_s1[('prey',p)] for p in ['alpha','beta','sigma','delta','dummy']]
-        st_vals = [res_st[('prey',p)] for p in ['alpha','beta','sigma','delta','dummy']]
+        s1_vals = [numpy.mean(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
+        st_vals = [numpy.mean(res_st[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
         N = len(s1_vals)
-        menStd = (0, 0, 0, 0, 0)
-        womenStd = (0, 0, 0, 0, 0)
+        s1_Std = [numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
+        st_Std = [numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
         ind = np.arange(N)  # the x locations for the groups
         width = 0.8  # the width of the bars: can also be len(x) sequence
 
-        p2 = plt.bar(ind, st_vals, width, bottom=[0, ] * N, yerr=womenStd)
-        p1 = plt.bar(ind, s1_vals, width, yerr=menStd)
+        p2 = plt.bar(ind, st_vals, width, bottom=[0, ] * N, yerr=st_Std)
+        p1 = plt.bar(ind, s1_vals, width, yerr=s1_Std)
 
         plt.ylim((0,1))
 
         plt.ylabel('eFAST sensitivity')
         plt.title('Lotka-Volterra EFAST')
         plt.xticks(ind, (r'$\alpha$', r'$\beta$', r'$\sigma$', r'$\delta$', r'$dummy$'))
-        # plt.yticks(np.arange(0, 81, 10))
+        plt.yticks(np.arange(0, 1, 0.1))
         plt.legend((p1[0], p2[0]), (r'$S_1$', r'$S_T$'))
 
         plt.savefig("LV.png")
 
         # Values derived from Fig 4 of Marino S, Hogue IB, Ray CJ, Kirschner DE. A methodology for performing global
         # uncertainty and sensitivity analysis in systems biology. J Theor Biol 2008; 254: 178-96.
-        self.assertTrue(0 < res_s1[('prey', 'alpha')] < 0.01)
-        self.assertTrue(0 < res_st[('prey', 'alpha')] < 0.2)
-        self.assertTrue(0.1 < res_s1[('prey', 'beta')] < 0.3)
-        self.assertTrue(0.6 < res_st[('prey', 'beta')] < 0.8)
-        self.assertTrue(0.2 < res_s1[('prey', 'sigma')] < 0.4)
-        self.assertTrue(0.7 < res_st[('prey', 'sigma')] < 0.9)
-        self.assertTrue(0 < res_s1[('prey', 'delta')] < 0.01)
-        self.assertTrue(0 < res_st[('prey', 'delta')] < 0.2)
+        self.assertTrue(0 < numpy.mean(res_s1[('prey', 'alpha')]) < 0.01)
+        self.assertTrue(0 < numpy.mean(res_st[('prey', 'alpha')]) < 0.2)
+        self.assertTrue(0.1 < numpy.mean(res_s1[('prey', 'beta')]) < 0.3)
+        self.assertTrue(0.6 < numpy.mean(res_st[('prey', 'beta')]) < 0.8)
+        self.assertTrue(0.2 < numpy.mean(res_s1[('prey', 'sigma')]) < 0.4)
+        self.assertTrue(0.7 < numpy.mean(res_st[('prey', 'sigma')]) < 0.9)
+        self.assertTrue(0 < numpy.mean(res_s1[('prey', 'delta')]) < 0.01)
+        self.assertTrue(0 < numpy.mean(res_st[('prey', 'delta')]) < 0.2)
 
 
 if __name__ == '__main__':

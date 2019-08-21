@@ -2,14 +2,11 @@ import epyc
 import math
 import numpy as np
 import scipy.stats as stats
+from .efastnotebook import EFASTJSONNotebook
 
 UNIFORM_DISTRIBUTION = 'uniform_distribution'
 NORMAL_DISTRIBUTION = 'normal_distribution'
 LOGNORMAL_DISTRIBUTION = 'lognormal_distribution'
-
-RUN_NUMBER = 'run_number'
-PARAMETER_OF_INTEREST = 'parameter_of_interest'
-DUMMY = 'dummy'
 
 # Reference material for EFAST:
 #
@@ -26,7 +23,7 @@ DUMMY = 'dummy'
 # J Theor Biol 2008; 254: 178-96. doi:10.1016/j.jtbi.2008.04.011
 
 
-def efast_sample_matrix(sample_number, interference, parameters):
+def efast_sample_matrix(sample_number, interference, parameters, resample_number):
     """
     Generate model inputs for the extended Fourier Amplitude Sensitivity Test (FAST).
 
@@ -43,11 +40,12 @@ def efast_sample_matrix(sample_number, interference, parameters):
     :return:
     """
     assert sample_number > 4 * interference ** 2, "Sample size N > 4M^2 is required. M=4 by default."
+    assert resample_number >= 1, "Resample number must be >= 1"
 
     # Determine certainty of parameters
     uncertain_params = [(p, v[0], v[1], v[2]) for (p, v) in parameters.iteritems() if len(v) > 1]
     # Add a dummy parameter (Marino et al., 2008)
-    uncertain_params.append((DUMMY, 0, 10, UNIFORM_DISTRIBUTION))
+    uncertain_params.append((EFASTJSONNotebook.DUMMY, 0, 10, UNIFORM_DISTRIBUTION))
     # Get parameters that only have one value
     certain_params = {p: v[0] for (p, v) in parameters.iteritems() if len(v) == 1}
     # Number of uncertain parameters
@@ -80,7 +78,7 @@ def efast_sample_matrix(sample_number, interference, parameters):
     s = (2 * math.pi / sample_number) * np.arange(sample_number)
 
     # Transformation to get points in the X space
-    x = np.zeros([sample_number * k, k])
+    x = np.zeros([k * resample_number * sample_number, k])
 
     # Taking each parameter as the parameter of interest
     for parameter_of_interest_pos in range(k):
@@ -96,73 +94,66 @@ def efast_sample_matrix(sample_number, interference, parameters):
         # Assign values
         omega2[idx] = omega[1:]
 
-        # Calculate the run ID numbers for this parameters
-        run_numbers = range(parameter_of_interest_pos * sample_number, (parameter_of_interest_pos + 1) * sample_number)
-
-        # TODO - resamples?
-
-        # random phase shift on [0, 2pi) following [Saltelli et al. 1999 - Sect 2.2]
-        phi = 2 * math.pi * np.random.rand()
-
         # Assign a value (in range [0,1]) to each parameter for each run based on their frequency and phase shift
-        for param in range(k):
-            g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[param] * s + phi))
-            x[run_numbers, param] = g
+        for rs in range(0, resample_number):
+            # Calculate the run IDs for this resample of this parameter
+            run_numbers = range(sample_number*(parameter_of_interest_pos*resample_number + rs),
+                                sample_number*(parameter_of_interest_pos*resample_number + rs + 1))
+
+            # random phase shift on [0, 2pi) following [Saltelli et al. 1999 - Sect 2.2]
+            phi = 2 * math.pi * np.random.rand()
+
+            for param in range(k):
+                g = 0.5 + (1 / math.pi) * np.arcsin(np.sin(omega2[param] * s + phi))
+                x[run_numbers, param] = g
 
     # Convert 0-1 values into values within the parameter range, based on distribution values and distribution type.
+    for q in range(len(uncertain_params)):
+        _, d1, d2, dist = uncertain_params[q]
+        if dist == UNIFORM_DISTRIBUTION:
+            assert d1 < d2, "Second value must exceed first for uniform distribution"
+            x[:, q] = x[:, q] * (d2 - d1) + d1
+        elif dist == NORMAL_DISTRIBUTION:
+            assert d2 > 0, "Standard deviation for normal must exceed 0"
+            x[:, q] = stats.norm.ppf(x[:, q], loc=d1, scale=d2)
+        # lognormal distribution (ln-space, not base-10)
+        # parameters are ln-space mean and standard deviation
+        elif dist == LOGNORMAL_DISTRIBUTION:
+            # checking for valid parameters
+            x[:, q] = np.exp(stats.norm.ppf(x[:, q], loc=d1, scale=d2))
+
     # Then add to the sample list
     samples = []
-    # Process a sample at a time
-    for j in range(x.shape[0]):
-        # Initialise the sample as the certain parameter values
+    rows_per_poi = resample_number*sample_number
+
+    for row in range(x.shape[0]):
         sample = certain_params.copy()
-        # For each uncertain parameter
-        for p in range(len(uncertain_params)):
-            dist = uncertain_params[p][3]
-            val = x[j, p]
-            if dist == UNIFORM_DISTRIBUTION:
-                minimum_val = uncertain_params[p][1]
-                maximum_val = uncertain_params[p][2]
-                assert minimum_val < maximum_val, "Second value must exceed first for uniform distribution"
-                val = val * (maximum_val - minimum_val) + minimum_val
-            elif dist == NORMAL_DISTRIBUTION:
-                loc = uncertain_params[p][1]
-                scale = uncertain_params[p][2]
-                assert scale > 0, "Standard deviation for normal must exceed 0"
-                val = stats.norm.ppf(val, loc=loc, scale=scale)
-            # lognormal distribution (ln-space, not base-10)
-            # parameters are ln-space mean and standard deviation
-            elif dist == LOGNORMAL_DISTRIBUTION:
-                loc = uncertain_params[p][1]
-                scale = uncertain_params[p][2]
-                # checking for valid parameters
-                val = np.exp(stats.norm.ppf(val, loc=loc, scale=scale))
-            else:
-                # Invalid distribution type
-                valid_dists = [UNIFORM_DISTRIBUTION, NORMAL_DISTRIBUTION, LOGNORMAL_DISTRIBUTION]
-                raise ValueError('Distributions: choose one of %s' % ", ".join(valid_dists))
-            # Assign value to parameter
-            sample[uncertain_params[p][0]] = val
-        # Add in experiment parameter values (needed for analysis)
-        sample[RUN_NUMBER] = j
-        sample[PARAMETER_OF_INTEREST] = uncertain_params[j / sample_number][0]
+        # Calculate the EFAST parameters (needed for analysis)
+        sample[EFASTJSONNotebook.PARAMETER_OF_INTEREST] = uncertain_params[row / rows_per_poi][0]
+        sample[EFASTJSONNotebook.RESAMPLE_NUMBER] = (row % rows_per_poi) / sample_number
+        sample[EFASTJSONNotebook.RUN_NUMBER] = row % sample_number
+        for q in range(len(uncertain_params)):
+            sample[uncertain_params[q][0]] = x[row,q]
         samples.append(sample)
     return samples
 
 
 class EFASTLab(epyc.Lab):
     def __init__(self, notebook):
+        assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
         epyc.Lab.__init__(self, notebook)
         self._sample_number = 0
         self._interference = 0
+        self._resample_number = 0
 
     def set_sample_number(self, samples):
-        # self._sample_number = samples
         self._notebook.set_sample_number(samples)
 
     def set_interference_factor(self, factor):
-        # self._interference = factor
         self._notebook.set_interference_factor(factor)
+
+    def set_resample_number(self, resamples):
+        self._notebook.set_resample_number(resamples)
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -173,24 +164,32 @@ class EFASTLab(epyc.Lab):
         else:
             NS = self._notebook.sample_number()
             Mi = self._notebook.interference_factor()
+            NR = self._notebook.resample_number()
             assert (NS > 0), "Sample number invalid: {0}. Set using {1}()"\
                 .format(self._sample_number, self.set_sample_number.__name__)
             assert (Mi > 0), "Interference value invalid: {0}. Set using {1}()"\
                 .format(self._interference, self.set_interference_factor.__name__)
-            return efast_sample_matrix(NS, Mi, self._parameters)
+            assert (NR >= 1), "Resample value invalid: {0}. Set using {1}()" \
+                .format(self._interference, self.set_resample_number.__name__)
+            return efast_sample_matrix(NS, Mi, self._parameters, NR)
 
 
 class EFASTClusterLab(epyc.ClusterLab):
     def __init__(self, notebook):
+        assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
         epyc.ClusterLab.__init__(self, notebook)
         self._sample_number = 0
         self._interference = 0
+        self._resample_number = 0
 
     def set_sample_number(self, samples):
-        self._sample_number = samples
+        self._notebook.set_sample_number(samples)
 
     def set_interference_factor(self, factor):
-        self._interference = factor
+        self._notebook.set_interference_factor(factor)
+
+    def set_resample_number(self, resamples):
+        self._notebook.set_resample_number(resamples)
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -201,8 +200,11 @@ class EFASTClusterLab(epyc.ClusterLab):
         else:
             NS = self._notebook.sample_number()
             Mi = self._notebook.interference_factor()
-            assert (NS > 0), "Sample number invalid: {0}. Set using {1}()" \
+            NR = self._notebook.resample_number()
+            assert (NS > 0), "Sample number invalid: {0}. Set using {1}()"\
                 .format(self._sample_number, self.set_sample_number.__name__)
-            assert (Mi > 0), "Interference value invalid: {0}. Set using {1}()" \
+            assert (Mi > 0), "Interference value invalid: {0}. Set using {1}()"\
                 .format(self._interference, self.set_interference_factor.__name__)
-            return efast_sample_matrix(NS, Mi, self._parameters)
+            assert (NR >= 1), "Resample value invalid: {0}. Set using {1}()" \
+                .format(self._interference, self.set_resample_number.__name__)
+            return efast_sample_matrix(NS, Mi, self._parameters, NR)
