@@ -178,8 +178,8 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
         s1_vals = [numpy.mean(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
         st_vals = [numpy.mean(res_st[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
         N = len(s1_vals)
-        s1_Std = [numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
-        st_Std = [numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
+        s1_Std = [2*numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
+        st_Std = [2*numpy.std(res_s1[('prey',p)]) for p in ['alpha','beta','sigma','delta','dummy']]
         ind = np.arange(N)  # the x locations for the groups
         width = 0.8  # the width of the bars: can also be len(x) sequence
 
