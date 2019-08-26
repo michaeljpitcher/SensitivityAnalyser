@@ -156,7 +156,8 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
                 for result_key in relevant_results.columns:
                     output_data = relevant_results[result_key]
                     f = np.fft.fft(output_data)
-                    Sp = np.power(np.absolute(f[np.arange(1, int((self._sample_number + 1) / 2))]) / self._sample_number, 2)
+                    Sp = np.power(np.absolute(f[np.arange(1, int((self._sample_number + 1) / 2))]) /
+                                  self._sample_number, 2)
 
                     q = np.arange(1, int(self._interference_factor) + 1) * int(omega[0]) - 1
                     V = 2 * np.sum(Sp)

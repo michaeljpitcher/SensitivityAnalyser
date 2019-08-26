@@ -53,6 +53,7 @@ class ScatterJSONNotebook(epyc.JSONLabNotebook):
                     pass
                 else:
                     plots[(p, r)][0].append(row[epyc.Experiment.PARAMETERS][p])
+                    plots[(p, r)][1].append(row[epyc.Experiment.RESULTS][r])
 
         for ((param, result), (x_data, y_data)) in plots.iteritems():
             plt.scatter(x_data, y_data)

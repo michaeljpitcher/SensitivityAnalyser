@@ -80,8 +80,9 @@ class LatinHypercubeJSONNotebook(AggregationJSONNotebook):
         regr = linear_model.LinearRegression()
 
         df = self.dataframe_aggregated()
-        ranked_params = DataFrame.rank(self.dataframe_aggregated_parameters())
-        ranked_results = DataFrame.rank(self.dataframe_aggregated_results())
+
+        ranked_params = DataFrame.rank(df[self.uncertain_parameters()])
+        ranked_results = DataFrame.rank(df[self._result_keys])
 
         # Turn data into numpy arrays
         all_params_data = numpy.asarray(ranked_params)
