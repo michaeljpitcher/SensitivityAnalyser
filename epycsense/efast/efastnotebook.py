@@ -19,64 +19,7 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
     """
 
     def __init__(self, name, create=True, description=None):
-        self._interference_factor = 0
-        self._sample_number = 0
-        self._resample_number = 0
         AggregationJSONNotebook.__init__(self, name, create, description)
-
-    def set_interference_factor(self, factor):
-        self._interference_factor = factor
-
-    def interference_factor(self):
-        return self._interference_factor
-
-    def set_sample_number(self, samples):
-        self._sample_number = samples
-
-    def sample_number(self):
-        return self._sample_number
-
-    def set_resample_number(self, resamples):
-        self._resample_number = resamples
-
-    def resample_number(self):
-        return self._resample_number
-
-    def _save( self, fn ):
-        """Persist the notebook to the given file. Saves the interference factor and sample number within the JSON file
-        so it can be loaded in future.
-
-        :param fn: the file name"""
-
-        # create JSON object (with additional experiment EFAST values in header)
-        j = json.dumps({'description': self.description(),
-                        'pending': self._pending,
-                        'results': self._results,
-                        EFASTJSONNotebook.INTERFERENCE_FACTOR: self._interference_factor,
-                        EFASTJSONNotebook.SAMPLE_NUMBER: self._sample_number,
-                        EFASTJSONNotebook.RESAMPLE_NUMBER: self._resample_number,},
-                       indent=4,
-                       cls=MetadataEncoder)
-
-        # write to file
-        with open(fn, 'w') as f:
-            f.write(j)
-
-    def _load( self, fn ):
-        """
-        Load JSON data. Reads the EFAST parameter values (interference number and sample number) from the file.
-        :param fn:
-        :return:
-        """
-        AggregationJSONNotebook._load(self, fn)
-        # load the JSON object to get EFAST parameters
-        with open(fn, "r") as f:
-            s = f.read()
-            # parse back into appropriate variables
-            j = json.loads(s)
-            self._interference_factor = j[EFASTJSONNotebook.INTERFERENCE_FACTOR]
-            self._sample_number = j[EFASTJSONNotebook.SAMPLE_NUMBER]
-            self._resample_number = j[EFASTJSONNotebook.RESAMPLE_NUMBER]
 
     def uncertain_parameters(self):
         """
@@ -121,16 +64,20 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         params_of_interest = data[EFASTJSONNotebook.PARAMETER_OF_INTEREST]
         results = data[self._result_keys]
 
+        sample_number = max(data[EFASTJSONNotebook.RUN_NUMBER]) + 1
+        resample_number =  max(data[EFASTJSONNotebook.RESAMPLE_NUMBER]) + 1
+        # TODO - hard-coded
+        interference_factor = 4
+
         # Check we have all expected results (NS * k)
-        assert len(results) == num_uncertain_params * self._sample_number * self._resample_number, "Invalid data length"
+        assert len(results) == num_uncertain_params * sample_number * resample_number, "Invalid data length"
 
         # Recreate the frequency vector used in the sampling
         omega = np.zeros([num_uncertain_params])
-        omega[0] = math.floor((self._sample_number - 1.0) / (2.0 * self._interference_factor))
+        omega[0] = math.floor((sample_number - 1.0) / (2.0 * interference_factor))
 
         # Recreate the complimentary parameter frequencies
-        # TODO - possibly redundant recreating this when we could save it in the data (like NS and Mi)
-        m = math.floor(omega[0] / (2.0 * self._interference_factor))
+        m = math.floor(omega[0] / (2.0 * interference_factor))
         if m >= (num_uncertain_params - 1):
             omega[1:] = np.floor(np.linspace(1, m, num_uncertain_params - 1))
         else:
@@ -143,23 +90,23 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
 
         # Loop through each uncertain parameter
         for i in range(num_uncertain_params):
-            for rs in range(self._resample_number):
+            for rs in range(resample_number):
                 # Get the relevant results for this parameter of interest and resample number
-                relevant_results = results[self._sample_number * (i + rs * self._resample_number):
-                                           self._sample_number * (i + rs * self._resample_number + 1)]
+                relevant_results = results[sample_number * (i + rs * resample_number):
+                                           sample_number * (i + rs * resample_number + 1)]
                 # Check it was the parameter of interest for all rows
-                poi = set(params_of_interest[self._sample_number * (i + rs * self._resample_number):
-                                             self._sample_number * (i + rs * self._resample_number + 1)])
+                poi = set(params_of_interest[sample_number * (i + rs * resample_number):
+                                             sample_number * (i + rs * resample_number + 1)])
                 assert len(poi) == 1
 
                 poi = poi.pop()
                 for result_key in relevant_results.columns:
                     output_data = relevant_results[result_key]
                     f = np.fft.fft(output_data)
-                    Sp = np.power(np.absolute(f[np.arange(1, int((self._sample_number + 1) / 2))]) /
-                                  self._sample_number, 2)
+                    Sp = np.power(np.absolute(f[np.arange(1, int((sample_number + 1) / 2))]) /
+                                  sample_number, 2)
 
-                    q = np.arange(1, int(self._interference_factor) + 1) * int(omega[0]) - 1
+                    q = np.arange(1, int(interference_factor) + 1) * int(omega[0]) - 1
                     V = 2 * np.sum(Sp)
                     D1 = 2 * np.sum(Sp[q])
                     S1[(result_key, poi)].append(D1 / V)
