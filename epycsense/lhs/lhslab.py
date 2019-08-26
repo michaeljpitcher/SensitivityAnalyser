@@ -87,7 +87,7 @@ class LatinHypercubeClusterLab(epyc.ClusterLab):
         else:
             return lhs_samples(self._parameters)
 
-    def set_parameter(self, parameter, value_range, stratifications, distribution=None):
+    def set_parameter_stratifications(self, parameter, value_range, stratifications, distribution=None):
         # Assume distribution (assume by default)
         if not distribution or distribution == LatinHypercubeLab.UNIFORM:
             self[parameter] = numpy.linspace(value_range[0], value_range[1], stratifications)
