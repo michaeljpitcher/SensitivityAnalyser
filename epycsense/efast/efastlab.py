@@ -147,13 +147,13 @@ class EFASTLab(epyc.Lab):
         self._resample_number = 0
 
     def set_sample_number(self, samples):
-        self._notebook.set_sample_number(samples)
+        self._sample_number = samples
 
     def set_interference_factor(self, factor):
-        self._notebook.set_interference_factor(factor)
+        self._interference = factor
 
     def set_resample_number(self, resamples):
-        self._notebook.set_resample_number(resamples)
+        self._resample_number = resamples
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -162,34 +162,31 @@ class EFASTLab(epyc.Lab):
         if len(self._parameters) == 0:
             return []
         else:
-            NS = self._notebook.sample_number()
-            Mi = self._notebook.interference_factor()
-            NR = self._notebook.resample_number()
-            assert (NS > 0), "Sample number invalid: {0}. Set using {1}()"\
+            assert (self._sample_number > 0), "Sample number invalid: {0}. Set using {1}()"\
                 .format(self._sample_number, self.set_sample_number.__name__)
-            assert (Mi > 0), "Interference value invalid: {0}. Set using {1}()"\
+            assert (self._interference > 0), "Interference value invalid: {0}. Set using {1}()"\
                 .format(self._interference, self.set_interference_factor.__name__)
-            assert (NR >= 1), "Resample value invalid: {0}. Set using {1}()" \
+            assert (self._resample_number >= 1), "Resample value invalid: {0}. Set using {1}()" \
                 .format(self._interference, self.set_resample_number.__name__)
-            return efast_sample_matrix(NS, Mi, self._parameters, NR)
+            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number)
 
 
 class EFASTClusterLab(epyc.ClusterLab):
-    def __init__(self, notebook, profile):
+    def __init__(self, notebook, profile, debug=False):
         assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
-        epyc.ClusterLab.__init__(self, notebook, profile=profile)
+        epyc.ClusterLab.__init__(self, notebook, profile=profile, debug=debug)
         self._sample_number = 0
         self._interference = 0
         self._resample_number = 0
 
     def set_sample_number(self, samples):
-        self._notebook.set_sample_number(samples)
+        self._sample_number = samples
 
     def set_interference_factor(self, factor):
-        self._notebook.set_interference_factor(factor)
+        self._interference = factor
 
     def set_resample_number(self, resamples):
-        self._notebook.set_resample_number(resamples)
+        self._resample_number = resamples
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -198,13 +195,10 @@ class EFASTClusterLab(epyc.ClusterLab):
         if len(self._parameters) == 0:
             return []
         else:
-            NS = self._notebook.sample_number()
-            Mi = self._notebook.interference_factor()
-            NR = self._notebook.resample_number()
-            assert (NS > 0), "Sample number invalid: {0}. Set using {1}()"\
+            assert (self._sample_number > 0), "Sample number invalid: {0}. Set using {1}()" \
                 .format(self._sample_number, self.set_sample_number.__name__)
-            assert (Mi > 0), "Interference value invalid: {0}. Set using {1}()"\
+            assert (self._interference > 0), "Interference value invalid: {0}. Set using {1}()" \
                 .format(self._interference, self.set_interference_factor.__name__)
-            assert (NR >= 1), "Resample value invalid: {0}. Set using {1}()" \
+            assert (self._resample_number >= 1), "Resample value invalid: {0}. Set using {1}()" \
                 .format(self._interference, self.set_resample_number.__name__)
-            return efast_sample_matrix(NS, Mi, self._parameters, NR)
+            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number)
