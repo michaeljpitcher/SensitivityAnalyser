@@ -62,6 +62,11 @@ class LatinHypercubeJSONNotebookTestCase(unittest.TestCase):
         self.rep_filename = 'LHSlabtest_repetitions.json'
         self.rep_nb = LatinHypercubeJSONNotebook(self.rep_filename, True)
 
+    def tearDown(self):
+        # # Get rid of json file
+        if os.path.exists(self.rep_filename):
+            os.remove(self.rep_filename)
+
     def test_get_pearson_correlation_coefficient(self):
         model = Model()
         params = {Model.PARAM_X1: (0, 10),
