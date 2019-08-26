@@ -73,8 +73,8 @@ class LatinHypercubeLab(epyc.Lab):
 
 
 class LatinHypercubeClusterLab(epyc.ClusterLab):
-    def __init__(self, notebook, profile):
-        epyc.ClusterLab.__init__(self, notebook, profile=profile)
+    def __init__(self, notebook, profile, debug=False):
+        epyc.ClusterLab.__init__(self, notebook, profile=profile, debug=debug)
 
     def parameterSpace( self ):
         """Return the parameter space of the experiment as a list of dicts,
