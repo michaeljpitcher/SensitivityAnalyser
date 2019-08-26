@@ -55,7 +55,7 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
     # to the other parameters
     omega = np.zeros([k])
 
-    # Frequency of parameter of interest [Saltelli et al. 1999 - eqn 21]
+    # Frequency of parameter of interest [Saltelli et al. 1999 - eqn 15]
     omega[0] = math.floor((sample_number - 1.0) / (2.0 * interference))
 
     # Maximum value of complimentary frequencies [Saltelli et al. 1999 - Sect 4.2, pg 47]
@@ -111,7 +111,7 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
     for q in range(len(uncertain_params)):
         _, d1, d2, dist = uncertain_params[q]
         if dist == UNIFORM_DISTRIBUTION:
-            assert d1 < d2, "Second value must exceed first for uniform distribution"
+            assert d1 < d2, "Second value must exceed first for uniform distribution: {0}, {1}".format(d1, d2)
             x[:, q] = x[:, q] * (d2 - d1) + d1
         elif dist == NORMAL_DISTRIBUTION:
             assert d2 > 0, "Standard deviation for normal must exceed 0"
@@ -175,9 +175,9 @@ class EFASTLab(epyc.Lab):
 
 
 class EFASTClusterLab(epyc.ClusterLab):
-    def __init__(self, notebook):
+    def __init__(self, notebook, profile):
         assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
-        epyc.ClusterLab.__init__(self, notebook)
+        epyc.ClusterLab.__init__(self, notebook, profile=profile)
         self._sample_number = 0
         self._interference = 0
         self._resample_number = 0
