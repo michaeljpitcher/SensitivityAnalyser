@@ -1,45 +1,50 @@
 import epyc
 import numpy
+import scipy.stats as stats
+
+UNIFORM_DISTRIBUTION = 'uniform_distribution'
+NORMAL_DISTRIBUTION = 'normal_distribution'
+LOGNORMAL_DISTRIBUTION = 'lognormal_distribution'
 
 
-def lhs_samples(parameters):
-    """Method to generate the latin Hypercube sample of all parameter values, creating the parameter space for the
-    experiment. Each value within the parameter range of an uncertain parameter is sampled only once, and thus
-    Number of samples = number of stratifications.
-
-    :returns: list of dicts"""
+def lhs_samples(parameters, stratifications):
     uncertain_params = {}
     certain_params = {}
-    stratifications = 0
+
+    parameters['dummy'] = [0,10,UNIFORM_DISTRIBUTION]
+
+    # Linspace 0-1, split into the number of stratfications sections
+    d = numpy.linspace(0,1,stratifications+2)[1:-1]
 
     # Determine if each parameter is certain or uncertain
     for param, param_range in parameters.iteritems():
         if len(param_range) > 1:
-            # Check that the stratifications of this uncertain parameter range match previous uncertain parameters
-            if not stratifications:
-                stratifications = len(param_range)
+            v1, v2, dist = param_range
+            if dist == UNIFORM_DISTRIBUTION:
+                values = [v1 + (v2 - v1) * y for y in d]
+            elif dist == NORMAL_DISTRIBUTION:
+                values = stats.norm.ppf(d, v1, v2)
+            elif dist == LOGNORMAL_DISTRIBUTION:
+                values = stats.lognorm.ppf(d, v1, v2)
             else:
-                assert len(param_range) == stratifications, "All uncertain parameters must have equal number of " \
-                                                            "stratifications for Latin Hypercube sampling"
-            uncertain_params[param] = param_range
+                raise Exception("Invalid distribtion")
+            uncertain_params[param] = values
         else:
             # Only one value so parameter is certain
             certain_params[param] = param_range[0]
 
     # Create the samples
     param_samples = []
-    uncertain_values = {}
+
     # Shuffle the range for each uncertain parameter
     for p, param_range in uncertain_params.iteritems():
-        uncertain_values[p] = numpy.random.choice(param_range, len(param_range), replace=False)
+        numpy.random.shuffle(uncertain_params[p])
+
     # Assign a parameter set based on the shuffled values
     for i in range(stratifications):
-        sample = {}
-        for p in uncertain_params:
-            sample[p] = uncertain_values[p][i]
+        sample = {p: v[i] for (p,v) in uncertain_params.iteritems()}
         # Set the certain params
-        for p, value in certain_params.iteritems():
-            sample[p] = value
+        sample.update(certain_params)
         param_samples.append(sample)
 
     # return the complete parameter space
@@ -47,10 +52,13 @@ def lhs_samples(parameters):
 
 
 class LatinHypercubeLab(epyc.Lab):
-    UNIFORM = 'uniform'
 
     def __init__(self, notebook):
+        self._stratifications = 0
         epyc.Lab.__init__(self, notebook)
+
+    def set_stratifications(self, value):
+        self._stratifications = value
 
     def parameterSpace( self ):
         """Return the parameter space of the experiment as a list of dicts,
@@ -61,22 +69,18 @@ class LatinHypercubeLab(epyc.Lab):
         if len(ps) == 0:
             return []
         else:
-            return lhs_samples(self._parameters)
-
-    def set_parameter_stratifications(self, parameter, value_range, stratifications, distribution=None):
-        # Assume distribution (assume by default)
-        if not distribution or distribution == LatinHypercubeLab.UNIFORM:
-            self[parameter] = numpy.linspace(value_range[0], value_range[1], stratifications)
-        else:
-            # TODO - normal distribution, etc
-            raise NotImplementedError
+            assert self._stratifications > 0, "Must set stratification number"
+            return lhs_samples(self._parameters, self._stratifications)
 
 
 class LatinHypercubeClusterLab(epyc.ClusterLab):
     def __init__(self, notebook, profile, debug=False):
         epyc.ClusterLab.__init__(self, notebook, profile=profile, debug=debug)
 
-    def parameterSpace( self ):
+    def set_stratifications(self, value):
+        self._stratifications = value
+
+    def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
         with each dict mapping each parameter name to a value.
 
@@ -85,12 +89,5 @@ class LatinHypercubeClusterLab(epyc.ClusterLab):
         if len(ps) == 0:
             return []
         else:
-            return lhs_samples(self._parameters)
-
-    def set_parameter_stratifications(self, parameter, value_range, stratifications, distribution=None):
-        # Assume distribution (assume by default)
-        if not distribution or distribution == LatinHypercubeLab.UNIFORM:
-            self[parameter] = numpy.linspace(value_range[0], value_range[1], stratifications)
-        else:
-            # TODO - normal distribution, etc
-            raise NotImplementedError
+            assert self._stratifications > 0, "Must set stratification number"
+            return lhs_samples(self._parameters, self._stratifications)

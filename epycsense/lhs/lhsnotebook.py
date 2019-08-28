@@ -8,6 +8,10 @@ import scipy.stats as stats
 from pandas import DataFrame
 from ..aggregated.aggregationnotebook import AggregationJSONNotebook
 
+import matplotlib
+# matplotlib.use('agg')
+import matplotlib.pyplot as plt
+
 
 class LatinHypercubeJSONNotebook(AggregationJSONNotebook):
     def __init__(self, name, create=True, description=None):
@@ -85,6 +89,7 @@ class LatinHypercubeJSONNotebook(AggregationJSONNotebook):
         ranked_results = DataFrame.rank(df[self._result_keys])
 
         # Turn data into numpy arrays
+
         all_params_data = numpy.asarray(ranked_params)
         result_data = numpy.asarray(ranked_results[result]).reshape((len(ranked_results),1))
 
@@ -117,12 +122,5 @@ class LatinHypercubeJSONNotebook(AggregationJSONNotebook):
 
         # Determine correlation between residuals
         corr, p = stats.pearsonr(param_resid, result_resid)
-
-        # Draw PRCC plots
-        # if plot:
-        #     title = "PRCC(" + parameter + ',' + result + "): " + str(corr) + '\n p =' + str(p)
-        #     filename = self.output_folder + parameter + "_" + result
-        #     plot_scatter_graph(param_resid, result_resid, title, parameter, result, save=True, filename=filename,
-        #                        show=False)
 
         return (corr, p)
