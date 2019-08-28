@@ -23,7 +23,7 @@ LOGNORMAL_DISTRIBUTION = 'lognormal_distribution'
 # J Theor Biol 2008; 254: 178-96. doi:10.1016/j.jtbi.2008.04.011
 
 
-def efast_sample_matrix(sample_number, interference, parameters, resample_number):
+def efast_sample_matrix(sample_number, interference, parameters, resample_number, required_parameters):
     """
     Generate model inputs for the extended Fourier Amplitude Sensitivity Test (FAST).
 
@@ -37,6 +37,8 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
     :param interference: The interference parameter, i.e., the number of harmonics to sum in the
         Fourier series decomposition
     :param parameters: parameters and values (from epyc)
+    :param resample_number
+    :param required_parameters: parameters to get values for. If empty, will be all uncertain parameters.
     :return:
     """
     assert sample_number > 4 * interference ** 2, "Sample size N > 4M^2 is required. M=4 by default."
@@ -46,6 +48,10 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
     uncertain_params = [(p, v[0], v[1], v[2]) for (p, v) in parameters.iteritems() if len(v) > 1]
     # Add a dummy parameter (Marino et al., 2008)
     uncertain_params.append((EFASTJSONNotebook.DUMMY, 0, 10, UNIFORM_DISTRIBUTION))
+
+    if len(required_parameters) == 0:
+        required_parameters = [k[0] for k in uncertain_params]
+
     # Get parameters that only have one value
     certain_params = {p: v[0] for (p, v) in parameters.iteritems() if len(v) == 1}
     # Number of uncertain parameters
@@ -130,21 +136,22 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
         sample = certain_params.copy()
         # Calculate the EFAST parameters (needed for analysis)
         sample[EFASTJSONNotebook.PARAMETER_OF_INTEREST] = uncertain_params[row / rows_per_poi][0]
-        sample[EFASTJSONNotebook.RESAMPLE_NUMBER] = (row % rows_per_poi) / sample_number
-        sample[EFASTJSONNotebook.RUN_NUMBER] = row % sample_number
-        for q in range(len(uncertain_params)):
-            sample[uncertain_params[q][0]] = x[row,q]
-        samples.append(sample)
+        if sample[EFASTJSONNotebook.PARAMETER_OF_INTEREST] in required_parameters:
+            sample[EFASTJSONNotebook.RESAMPLE_NUMBER] = (row % rows_per_poi) / sample_number
+            sample[EFASTJSONNotebook.RUN_NUMBER] = row % sample_number
+            for q in range(len(uncertain_params)):
+                sample[uncertain_params[q][0]] = x[row,q]
+            samples.append(sample)
     return samples
 
 
 class EFASTLab(epyc.Lab):
     def __init__(self, notebook):
-        assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
         epyc.Lab.__init__(self, notebook)
         self._sample_number = 0
         self._interference = 0
         self._resample_number = 0
+        self._required_parameters = []
 
     def set_sample_number(self, samples):
         self._sample_number = samples
@@ -154,6 +161,9 @@ class EFASTLab(epyc.Lab):
 
     def set_resample_number(self, resamples):
         self._resample_number = resamples
+
+    def set_required_parameters(self, params):
+        self._required_parameters = params
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -168,12 +178,12 @@ class EFASTLab(epyc.Lab):
                 .format(self._interference, self.set_interference_factor.__name__)
             assert (self._resample_number >= 1), "Resample value invalid: {0}. Set using {1}()" \
                 .format(self._interference, self.set_resample_number.__name__)
-            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number)
+            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number,
+                                       self._required_parameters)
 
 
 class EFASTClusterLab(epyc.ClusterLab):
     def __init__(self, notebook, profile, debug=False):
-        assert isinstance(notebook, EFASTJSONNotebook), "Notebook must be Efast JSON notebook"
         epyc.ClusterLab.__init__(self, notebook, profile=profile, debug=debug)
         self._sample_number = 0
         self._interference = 0
