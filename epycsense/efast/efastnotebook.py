@@ -62,7 +62,7 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
                                                            EFASTJSONNotebook.RESAMPLE_NUMBER,
                                                            EFASTJSONNotebook.RUN_NUMBER])
         params_of_interest = data[EFASTJSONNotebook.PARAMETER_OF_INTEREST]
-        results = data[self._result_keys]
+        required_parameters = list(set(params_of_interest))
 
         sample_number = max(data[EFASTJSONNotebook.RUN_NUMBER]) + 1
         resample_number =  max(data[EFASTJSONNotebook.RESAMPLE_NUMBER]) + 1
@@ -70,7 +70,7 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         interference_factor = 4
 
         # Check we have all expected results (NS * k)
-        assert len(results) == num_uncertain_params * sample_number * resample_number, "Invalid data length"
+        assert len(data) == len(required_parameters) * sample_number * resample_number, "Invalid data length"
 
         # Recreate the frequency vector used in the sampling
         omega = np.zeros([num_uncertain_params])
@@ -89,22 +89,15 @@ class EFASTJSONNotebook(AggregationJSONNotebook):
         ST = {(rk, p): [] for (rk,p) in itertools.product(self._result_keys, self.uncertain_parameters())}
 
         # Loop through each uncertain parameter
-        for i in range(num_uncertain_params):
+        for i in range(len(required_parameters)):
+            poi = required_parameters[i]
             for rs in range(resample_number):
-                # Get the relevant results for this parameter of interest and resample number
-                relevant_results = results[sample_number * (i + rs * resample_number):
-                                           sample_number * (i + rs * resample_number + 1)]
-                # Check it was the parameter of interest for all rows
-                poi = set(params_of_interest[sample_number * (i + rs * resample_number):
-                                             sample_number * (i + rs * resample_number + 1)])
-                assert len(poi) == 1
-
-                poi = poi.pop()
-                for result_key in relevant_results.columns:
-                    output_data = relevant_results[result_key]
-                    f = np.fft.fft(output_data)
+                relevant_rows = data[(data.parameter_of_interest==poi) & (data.resample_number==rs)]
+                for result_key in self._result_keys:
+                    result_data = relevant_rows[result_key]
+                    f = np.fft.fft(result_data)
                     Sp = np.power(np.absolute(f[np.arange(1, int((sample_number + 1) / 2))]) /
-                                  sample_number, 2)
+                                          sample_number, 2)
 
                     q = np.arange(1, int(interference_factor) + 1) * int(omega[0]) - 1
                     V = 2 * np.sum(Sp)

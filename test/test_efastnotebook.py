@@ -70,30 +70,32 @@ class EFASTJSONNotebookTestCase(unittest.TestCase):
     #         os.remove(self.filename)
 
     def test_analyse(self):
-        # nb_pre = EFASTJSONNotebook(self.filename, True)
-        # self.lab = EFASTLab(nb_pre)
+        nb_pre = EFASTJSONNotebook(self.filename, True)
+        self.lab = EFASTLab(nb_pre)
+
+        model = LotkaVolterraModel()
+        self.lab[LotkaVolterraModel.PARAM_ALPHA] = [1.5, 0.01, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_BETA] = [1, 0.2, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_SIGMA] = [3, 0.2, NORMAL_DISTRIBUTION]
+        self.lab[LotkaVolterraModel.PARAM_DELTA] = [1, 0.01, NORMAL_DISTRIBUTION]
+
+        self.lab[LotkaVolterraModel.INIT_Q] = 10
+        self.lab[LotkaVolterraModel.INIT_P] = 5
+
+        model.set_time_params(20, 21)
+
+        resamples = 5  # NR
+        runs = 257  # NS
+        mi = 4.0
+
+        self.lab.set_sample_number(runs)
+        self.lab.set_resample_number(resamples)
+        self.lab.set_interference_factor(mi)
         #
-        # model = LotkaVolterraModel()
-        # self.lab[LotkaVolterraModel.PARAM_ALPHA] = [1.5, 0.01, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_BETA] = [1, 0.2, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_SIGMA] = [3, 0.2, NORMAL_DISTRIBUTION]
-        # self.lab[LotkaVolterraModel.PARAM_DELTA] = [1, 0.01, NORMAL_DISTRIBUTION]
-        #
-        # self.lab[LotkaVolterraModel.INIT_Q] = 10
-        # self.lab[LotkaVolterraModel.INIT_P] = 5
-        #
-        # model.set_time_params(20, 21)
-        #
-        # resamples = 5  # NR
-        # runs = 257  # NS
-        # mi = 4.0
-        #
-        # self.lab.set_sample_number(runs)
-        # self.lab.set_resample_number(resamples)
-        # self.lab.set_interference_factor(mi)
-        #
-        # print "Running Experiment"
-        # self.lab.runExperiment(RepeatedExperiment(model, 2))
+        # self.lab.set_required_parameters([LotkaVolterraModel.PARAM_ALPHA, LotkaVolterraModel.PARAM_BETA])
+
+        print "Running Experiment"
+        self.lab.runExperiment(RepeatedExperiment(model, 2))
 
         nb_post = EFASTJSONNotebook(self.filename, False)
         print "Analysing Experiment Results"

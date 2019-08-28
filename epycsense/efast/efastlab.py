@@ -142,6 +142,8 @@ def efast_sample_matrix(sample_number, interference, parameters, resample_number
             for q in range(len(uncertain_params)):
                 sample[uncertain_params[q][0]] = x[row,q]
             samples.append(sample)
+
+    print "Sample generated of length {0}".format(len(samples))
     return samples
 
 
@@ -188,6 +190,7 @@ class EFASTClusterLab(epyc.ClusterLab):
         self._sample_number = 0
         self._interference = 0
         self._resample_number = 0
+        self._required_parameters = []
 
     def set_sample_number(self, samples):
         self._sample_number = samples
@@ -197,6 +200,9 @@ class EFASTClusterLab(epyc.ClusterLab):
 
     def set_resample_number(self, resamples):
         self._resample_number = resamples
+
+    def set_required_parameters(self, params):
+        self._required_parameters = params
 
     def parameterSpace(self):
         """Return the parameter space of the experiment as a list of dicts,
@@ -211,4 +217,5 @@ class EFASTClusterLab(epyc.ClusterLab):
                 .format(self._interference, self.set_interference_factor.__name__)
             assert (self._resample_number >= 1), "Resample value invalid: {0}. Set using {1}()" \
                 .format(self._interference, self.set_resample_number.__name__)
-            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number)
+            return efast_sample_matrix(self._sample_number, self._interference, self._parameters, self._resample_number,
+                                       self._required_parameters)
